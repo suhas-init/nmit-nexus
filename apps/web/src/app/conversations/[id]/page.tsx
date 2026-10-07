@@ -38,7 +38,7 @@ export default function ConversationPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--navy)", marginBottom: "1rem" }}>Conversation</h1>
+      <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "1rem" }}>Conversation</h1>
 
       <div className="card" style={{ padding: "1rem", height: "60vh", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.6rem", paddingRight: "0.5rem" }}>
@@ -51,8 +51,8 @@ export default function ConversationPage() {
                 <div style={{
                   padding: "0.6rem 0.85rem",
                   borderRadius: 12,
-                  background: isOffer ? "#fff6d9" : mine ? "var(--navy)" : "#eef1f7",
-                  color: isOffer ? "#8a6500" : mine ? "white" : "var(--navy)",
+                  background: isOffer ? "#fff6d9" : mine ? "var(--text-0)" : "#eef1f7",
+                  color: isOffer ? "#8a6500" : mine ? "white" : "var(--text-0)",
                   fontSize: "0.9rem",
                   fontWeight: isOffer ? 600 : 400,
                   border: isOffer ? "1px solid #f0dc8c" : "none",

@@ -1,61 +1,976 @@
 @import "tailwindcss";
 
 :root {
-  --navy: #0B1E3F;
-  --navy-2: #12294f;
-  --gold: #F2B705;
-  --slate: #334155;
-  --bg: #f7f8fb;
-  --card: #ffffff;
-  --border: #e5e7eb;
+  --bg-0: #08090B;
+  --bg-1: #0D0F12;
+  --bg-2: #14171C;
+  --bg-3: #1B1F26;
+
+  --border-0: #1C1F25;
+  --border-1: #262A32;
+  --border-2: #343A44;
+
+  --text-0: #F5F7FA;
+  --text-1: #A6ADB8;
+  --text-2: #6B7280;
+
+  --accent: #F2B705;
+  --accent-hover: #FFC923;
+  --accent-dim: #8A6500;
+
+  --green: #4ADE80;
+  --red: #F87171;
+  --blue: #60A5FA;
 }
 
 * { box-sizing: border-box; }
 
 html, body {
-  background: var(--bg);
-  color: var(--slate);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+  letter-spacing: -0.011em;
 }
 
-a { color: inherit; text-decoration: none; }
+.mono {
+  font-family: var(--font-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0;
+}
 
+/* Section label — subtle, uppercase, monospace */
+.term-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+}
+
+/* Buttons — flat, sharp */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 0.6rem 1.1rem; border-radius: 0.6rem;
-  font-weight: 600; font-size: 0.9rem; cursor: pointer;
-  transition: all 0.15s ease; border: 1px solid transparent;
+  gap: 0.5rem; padding: 0.6rem 1.1rem; border-radius: 6px;
+  font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.15s ease;
+  border: 1px solid transparent; text-decoration: none;
+  white-space: nowrap;
 }
-.btn-primary { background: var(--navy); color: white; }
-.btn-primary:hover { background: var(--navy-2); }
-.btn-gold { background: var(--gold); color: var(--navy); }
-.btn-gold:hover { filter: brightness(0.95); }
-.btn-outline { border-color: var(--border); background: white; color: var(--navy); }
-.btn-outline:hover { border-color: var(--navy); }
-.btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.input, .textarea, .select {
-  width: 100%; padding: 0.65rem 0.85rem; border-radius: 0.6rem;
-  border: 1px solid var(--border); background: white; font-size: 0.95rem;
-  color: var(--navy); outline: none; transition: border-color 0.15s;
+.btn-primary {
+  background: var(--accent); color: #08090B;
+  border-color: var(--accent); font-weight: 600;
 }
-.input:focus, .textarea:focus, .select:focus { border-color: var(--navy); }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-outline {
+  background: var(--bg-1); color: var(--text-0);
+  border-color: var(--border-1);
+}
+.btn-outline:hover { background: var(--bg-2); border-color: var(--border-2); }
+.btn-ghost {
+  background: transparent; color: var(--text-1);
+  border-color: transparent;
+}
+.btn-ghost:hover { background: var(--bg-2); color: var(--text-0); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* Cards — bordered, no shadow */
 .card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 0.9rem; overflow: hidden;
+  background: var(--bg-1);
+  border: 1px solid var(--border-0);
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+}
+.card:hover { border-color: var(--border-1); }
+
+/* Inputs */
+.input, .textarea, .select {
+  width: 100%; padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-1);
+  background: var(--bg-2); color: var(--text-0);
+  font-size: 0.88rem; font-family: inherit;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.12);
+}
+.input::placeholder, .textarea::placeholder { color: var(--text-2); }
+
+/* Badges — pill, subtle */
+.badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.68rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  border-radius: 4px; border: 1px solid transparent;
+  font-family: var(--font-mono), monospace;
+}
+.badge-active { background: rgba(74, 222, 128, 0.08); color: var(--green); border-color: rgba(74, 222, 128, 0.2); }
+.badge-sold { background: rgba(248, 113, 113, 0.08); color: var(--red); border-color: rgba(248, 113, 113, 0.2); }
+.badge-verified { background: rgba(242, 183, 5, 0.08); color: var(--accent); border-color: rgba(242, 183, 5, 0.2); }
+.badge-condition { background: rgba(96, 165, 250, 0.08); color: var(--blue); border-color: rgba(96, 165, 250, 0.2); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-0); }
+::-webkit-scrollbar-thumb { background: var(--border-1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-2); }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-1) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight: 600;
-  border-radius: 999px; text-transform: uppercase; letter-spacing: 0.02em;
+/* Live pulse */
+.pulse-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); position: relative;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55);
+  animation: pulse 2s infinite;
 }
-.badge-active { background: #e7f5ec; color: #1e7a3f; }
-.badge-sold { background: #fdeaea; color: #b42318; }
-.badge-verified { background: #fff6d9; color: #8a6500; }
-.badge-condition { background: #eef1f7; color: var(--navy); }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+/* Interactive dot grid — THE effect */
+.dot-grid {
+  position: relative;
+  background-image: radial-gradient(circle, var(--border-1) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.dot-grid::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, var(--accent) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(circle 160px at var(--mx, 50%) var(--my, 50%), black 0%, transparent 100%);
+  mask-image: radial-gradient(circle 160px at var(--mx, 50%) var(--my, 50%), black 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.dot-grid:hover::after { opacity: 1; }
+
+/* Typewriter cursor */
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+/* Marquee */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { display: inline-flex; animation: marquee 44s linear infinite; white-space: nowrap; }
+
+/* Fade in on load */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) backwards; }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Hover lift — subtle */
+.lift { transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease; }
+.lift:hover { transform: translateY(-2px); border-color: var(--border-2); }
+
+/* Thumbnail — dark, refined */
+.thumb {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.03) 0%, transparent 60%),
+    var(--bg-2);
+  display: grid; place-items: center;
+  color: var(--text-2);
+  font-family: var(--font-mono), monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
 
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ==== LIGHT THEME ==== */
+html[data-theme="light"] {
+  --bg-0: #FAFAFA;
+  --bg-1: #FFFFFF;
+  --bg-2: #F4F5F7;
+  --bg-3: #EAECEF;
+
+  --border-0: #E5E7EB;
+  --border-1: #D1D5DB;
+  --border-2: #9CA3AF;
+
+  --text-0: #0A0E14;
+  --text-1: #4B5563;
+  --text-2: #6B7280;
+
+  --accent: #B8860B;
+  --accent-hover: #A0750A;
+  --accent-dim: #D4A017;
+
+  --green: #16A34A;
+  --red: #DC2626;
+  --blue: #2563EB;
+}
+
+html[data-theme="light"] body {
+  background: var(--bg-0);
+  color: var(--text-0);
+}
+
+html[data-theme="light"] .thumb {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0,0,0,0.03) 0%, transparent 60%),
+    var(--bg-2);
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-2); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: var(--border-1); }
+
+/* Theme transition */
+html, body, .card, .btn, .input, .textarea, .select, .badge {
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Container padding scales down on small screens */
+@media (max-width: 768px) {
+  main { padding: 1rem 0.85rem 2rem !important; }
+}
+
+/* Global overflow guards */
+html, body { overflow-x: hidden; max-width: 100vw; }
+img, svg { max-width: 100%; height: auto; }
+
+/* Hide verbose text on tiny screens */
+@media (max-width: 480px) {
+  .hide-xs { display: none !important; }
+}
+
+/* Nav: hide label text on small, keep icons */
+@media (max-width: 900px) {
+  .nav-label { display: none; }
+  .nav-link { padding: 0.45rem 0.55rem !important; }
+}
+
+/* Sticky sidebars stack on mobile */
+@media (max-width: 900px) {
+  .sidebar-sticky { position: static !important; }
+}
+
+/* Feature/bento grids collapse */
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr !important; }
+  .grid-features { grid-template-columns: 1fr !important; }
+  .grid-features > * { border-right: none !important; border-bottom: 1px solid var(--border-0) !important; }
+  .grid-features > *:last-child { border-bottom: none !important; }
+}
+
+/* Split hero collapses */
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr !important; gap: 2rem !important; padding: 3rem 0 2rem !important; }
+}
+
+/* Marketplace: filter sidebar becomes a scrollable pill row */
+@media (max-width: 900px) {
+  .market-layout { grid-template-columns: 1fr !important; }
+  .market-sidebar {
+    position: static !important;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: end;
+  }
+  .market-sidebar > * { margin-bottom: 0 !important; }
+  .market-sidebar > div:last-child { grid-column: span 2; }
+}
+@media (max-width: 480px) {
+  .market-sidebar { grid-template-columns: 1fr; }
+  .market-sidebar > div:last-child { grid-column: span 1; }
+}
+
+/* Cards fill on mobile */
+@media (max-width: 640px) {
+  .card-grid-2 { grid-template-columns: 1fr !important; }
+}
+
+/* Detail page stacks */
+@media (max-width: 900px) {
+  .detail-split { grid-template-columns: 1fr !important; }
+  .detail-split > aside { position: static !important; }
+}
+
+/* Dashboard stat grid */
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* Offers/notifications row: stack the price + buttons */
+@media (max-width: 640px) {
+  .row-stack { flex-direction: column !important; align-items: stretch !important; gap: 0.6rem !important; }
+  .row-stack > div:last-child { flex-wrap: wrap; }
+}
+
+/* Hero title never overflows */
+@media (max-width: 480px) {
+  h1 { font-size: 1.9rem !important; line-height: 1.1 !important; }
+  h2 { font-size: 1.25rem !important; }
+  .btn { padding: 0.55rem 0.9rem !important; font-size: 0.78rem !important; }
+}
+
+/* Command palette full width on mobile */
+@media (max-width: 640px) {
+  .cmd-palette-wrap { padding-top: 6vh !important; padding-left: 1rem; padding-right: 1rem; }
+  .cmd-palette { max-width: 100% !important; }
+}
+
+/* Hide hero dot grid panel on very small screens */
+@media (max-width: 640px) {
+  .hero-dotgrid { display: none !important; }
+}
+
+/* Mobile navbar swap */
+@media (max-width: 900px) {
+  .desktop-nav { display: none !important; }
+  .mobile-menu-btn { display: inline-flex !important; }
+}
+@media (min-width: 901px) {
+  .mobile-menu { display: none !important; }
+}
+
+/* ============================================ */
+/* LIGHT THEME — refined, monochrome-first     */
+/* ============================================ */
+
+html[data-theme="light"] {
+  /* Surfaces — clean, not inverted */
+  --bg-0: #FBFBFC;
+  --bg-1: #FFFFFF;
+  --bg-2: #F5F6F8;
+  --bg-3: #EBEDF0;
+
+  --border-0: #E6E8EC;
+  --border-1: #D5D8DD;
+  --border-2: #B8BDC5;
+
+  --text-0: #0F1115;
+  --text-1: #4A5058;
+  --text-2: #7C828C;
+
+  /* Charcoal primary — clean, professional */
+  --accent: #18181B;
+  --accent-hover: #2A2A2E;
+  --accent-dim: #52525B;
+
+  --green: #16A34A;
+  --red: #DC2626;
+  --blue: #2563EB;
+}
+
+html[data-theme="light"] body {
+  background: var(--bg-0);
+  color: var(--text-0);
+}
+
+/* Kill the ambient top glow in light */
+html[data-theme="light"] .grid-bg,
+html[data-theme="light"] [aria-hidden].grid-bg {
+  background: var(--bg-0) !important;
+}
+
+/* Hide cursor glow in light — looks dirty on white */
+html[data-theme="light"] .cursor-glow,
+html[data-theme="light"] [class*="cursor-glow"] {
+  display: none !important;
+}
+
+/* Buttons in light — clean monochrome */
+html[data-theme="light"] .btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+html[data-theme="light"] .btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: none;
+}
+html[data-theme="light"] .btn-outline {
+  background: #FFFFFF;
+  color: var(--text-0);
+  border-color: var(--border-1);
+}
+html[data-theme="light"] .btn-outline:hover {
+  background: var(--bg-2);
+  border-color: var(--border-2);
+}
+
+/* Logo mark in light — charcoal */
+html[data-theme="light"] [style*="--accent)"][style*="placeItems: center"][style*="fontWeight: 900"] {
+  background: var(--accent) !important;
+  color: #FFFFFF !important;
+}
+
+/* Badges in light — subtle tinted */
+html[data-theme="light"] .badge-active { background: rgba(22,163,74,0.08); color: #15803D; border-color: rgba(22,163,74,0.22); }
+html[data-theme="light"] .badge-sold { background: rgba(220,38,38,0.08); color: #B91C1C; border-color: rgba(220,38,38,0.22); }
+html[data-theme="light"] .badge-verified { background: rgba(24,24,27,0.06); color: var(--text-0); border-color: rgba(24,24,27,0.15); }
+html[data-theme="light"] .badge-condition { background: rgba(37,99,235,0.08); color: #1D4ED8; border-color: rgba(37,99,235,0.22); }
+
+/* Cards — subtle shadow, not borders */
+html[data-theme="light"] .card {
+  background: #FFFFFF;
+  border-color: var(--border-0);
+  box-shadow: 0 1px 2px rgba(15,17,21,0.04);
+}
+html[data-theme="light"] .card:hover {
+  border-color: var(--border-1);
+  box-shadow: 0 4px 12px rgba(15,17,21,0.06);
+}
+
+/* Inputs in light */
+html[data-theme="light"] .input,
+html[data-theme="light"] .textarea,
+html[data-theme="light"] .select {
+  background: #FFFFFF;
+  border-color: var(--border-1);
+  color: var(--text-0);
+}
+html[data-theme="light"] .input:focus,
+html[data-theme="light"] .textarea:focus,
+html[data-theme="light"] .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(24,24,27,0.08);
+}
+html[data-theme="light"] .input::placeholder,
+html[data-theme="light"] .textarea::placeholder { color: var(--text-2); }
+
+/* Marquee — kill gold, use charcoal */
+html[data-theme="light"] .marquee .mono span[style*="--accent)"],
+html[data-theme="light"] .marquee > span > span {
+  color: var(--text-2) !important;
+}
+html[data-theme="light"] .marquee > span {
+  color: var(--text-2) !important;
+}
+html[data-theme="light"] .marquee > span > span:first-child {
+  color: var(--text-2) !important;
+}
+
+/* Dot grid — neutral gray dots in light */
+html[data-theme="light"] .dot-grid {
+  background-image: radial-gradient(circle, #C9CDD3 1px, transparent 1px) !important;
+}
+html[data-theme="light"] .dot-grid::after {
+  background-image: radial-gradient(circle, var(--accent) 1.5px, transparent 1.5px) !important;
+}
+
+/* Pulse dot stays green */
+html[data-theme="light"] .pulse-dot {
+  background: var(--green);
+}
+
+/* Scroll progress — charcoal in light */
+html[data-theme="light"] [style*="background: var(--accent)"][style*="height: 100%"] {
+  background: var(--accent) !important;
+}
+
+/* Typewriter accent stays charcoal in light */
+html[data-theme="light"] .cursor-blink { color: var(--accent) !important; }
+
+/* Scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-2); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: var(--border-1); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--border-2); }
+
+/* Marquee border fix */
+html[data-theme="light"] .marquee {
+  color: var(--text-2);
+}
+
+/* Skeleton in light */
+html[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, #F0F1F3 0%, #E6E8EC 50%, #F0F1F3 100%);
+  background-size: 200% 100%;
+}
+
+/* Thumb in light — soft gray */
+html[data-theme="light"] .thumb {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0,0,0,0.02) 0%, transparent 60%),
+    #F0F1F3;
+  color: var(--text-2);
+}
+
+/* Hover preview popup in light */
+html[data-theme="light"] [style*="boxShadow: \"0 20px 40px"] {
+  box-shadow: 0 20px 40px -20px rgba(15,17,21,0.15) !important;
+}
+
+/* ==================================================== */
+/* LIGHT v2 — warm sunlit theme, matches dark richness  */
+/* ==================================================== */
+
+html[data-theme="light"] {
+  --bg-0: #FAF7F1;      /* warm cream */
+  --bg-1: #FFFFFF;      /* pure white cards */
+  --bg-2: #F3EFE6;      /* warm stone */
+  --bg-3: #EBE5D6;      /* darker warm stone */
+
+  --border-0: #EAE3D2;
+  --border-1: #D9D0BA;
+  --border-2: #B8AE95;
+
+  --text-0: #1A1815;    /* warm near-black */
+  --text-1: #5A5245;
+  --text-2: #8A8273;
+
+  --accent: #B45309;            /* rich amber */
+  --accent-hover: #92400E;      /* deeper rust on hover */
+  --accent-dim: #D97706;        /* lighter amber for dim uses */
+
+  --green: #15803D;
+  --red: #B91C1C;
+  --blue: #1D4ED8;
+}
+
+/* Body + ambient atmosphere */
+html[data-theme="light"] body {
+  background: var(--bg-0);
+  color: var(--text-0);
+}
+
+/* Warm radial glow at top — NOT suppressed like before */
+html[data-theme="light"] .grid-bg,
+html[data-theme="light"] [aria-hidden].grid-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(180, 83, 9, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 60%),
+    var(--bg-0) !important;
+}
+
+/* Cursor glow — enabled, warm hue */
+html[data-theme="light"] .cursor-glow,
+html[data-theme="light"] [class*="cursor-glow"] {
+  display: block !important;
+  background: radial-gradient(circle, rgba(180, 83, 9, 0.09) 0%, transparent 65%) !important;
+}
+
+/* Buttons — amber primary, warm outline */
+html[data-theme="light"] .btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+  box-shadow: 0 1px 2px rgba(180, 83, 9, 0.15);
+}
+html[data-theme="light"] .btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+}
+html[data-theme="light"] .btn-outline {
+  background: #FFFFFF;
+  color: var(--text-0);
+  border-color: var(--border-1);
+}
+html[data-theme="light"] .btn-outline:hover {
+  background: var(--bg-2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+html[data-theme="light"] .btn-violet {
+  background: linear-gradient(120deg, #7C3AED 0%, #C026D3 100%);
+  color: white;
+}
+
+/* Cards — warm shadow, subtle warmth on hover */
+html[data-theme="light"] .card {
+  background: #FFFFFF;
+  border-color: var(--border-0);
+  box-shadow:
+    0 1px 2px rgba(94, 60, 20, 0.04),
+    0 2px 8px rgba(94, 60, 20, 0.03);
+}
+html[data-theme="light"] .card:hover {
+  border-color: var(--border-1);
+  box-shadow:
+    0 4px 12px rgba(94, 60, 20, 0.06),
+    0 12px 32px rgba(94, 60, 20, 0.04);
+}
+
+/* Inputs */
+html[data-theme="light"] .input,
+html[data-theme="light"] .textarea,
+html[data-theme="light"] .select {
+  background: #FFFFFF;
+  border-color: var(--border-1);
+  color: var(--text-0);
+}
+html[data-theme="light"] .input:focus,
+html[data-theme="light"] .textarea:focus,
+html[data-theme="light"] .select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
+}
+html[data-theme="light"] .input::placeholder,
+html[data-theme="light"] .textarea::placeholder { color: var(--text-2); }
+
+/* Badges — colorful and confident in light */
+html[data-theme="light"] .badge-active {
+  background: rgba(21, 128, 61, 0.10); color: #15803D; border-color: rgba(21, 128, 61, 0.25);
+}
+html[data-theme="light"] .badge-sold {
+  background: rgba(185, 28, 28, 0.10); color: #B91C1C; border-color: rgba(185, 28, 28, 0.25);
+}
+html[data-theme="light"] .badge-verified {
+  background: rgba(180, 83, 9, 0.10); color: var(--accent); border-color: rgba(180, 83, 9, 0.28);
+}
+html[data-theme="light"] .badge-condition {
+  background: rgba(29, 78, 216, 0.08); color: var(--blue); border-color: rgba(29, 78, 216, 0.22);
+}
+html[data-theme="light"] .badge-violet {
+  background: rgba(124, 58, 237, 0.10); color: #6D28D9; border-color: rgba(124, 58, 237, 0.25);
+}
+
+/* Marquee — warm amber bullets */
+html[data-theme="light"] .marquee > span {
+  color: var(--text-2) !important;
+}
+html[data-theme="light"] .marquee > span > span:first-child {
+  color: var(--accent) !important;
+}
+
+/* Dot grid — visible warm dots */
+html[data-theme="light"] .dot-grid {
+  background-image: radial-gradient(circle, #D9D0BA 1px, transparent 1px) !important;
+}
+html[data-theme="light"] .dot-grid::after {
+  background-image: radial-gradient(circle, var(--accent) 1.5px, transparent 1.5px) !important;
+}
+
+/* Typewriter cursor blinks amber */
+html[data-theme="light"] .cursor-blink { color: var(--accent) !important; }
+
+/* Scroll progress bar */
+html[data-theme="light"] [style*="background: var(--accent)"][style*="height: 100%"] {
+  background: var(--accent) !important;
+}
+
+/* Logo mark */
+html[data-theme="light"] [style*="--accent)"][style*="placeItems: center"][style*="fontWeight: 900"] {
+  background: var(--accent) !important;
+  color: #FFFFFF !important;
+}
+
+/* Scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-2); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: var(--border-1); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* Thumb — warm stone */
+html[data-theme="light"] .thumb {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(180, 83, 9, 0.05) 0%, transparent 60%),
+    var(--bg-2);
+  color: var(--text-2);
+}
+
+/* Skeleton — warm shimmer */
+html[data-theme="light"] .skeleton {
+  background: linear-gradient(90deg, #F3EFE6 0%, #E8E0CE 50%, #F3EFE6 100%);
+  background-size: 200% 100%;
+}
+
+/* Live pulse dot — same green, glows slightly */
+html[data-theme="light"] .pulse-dot {
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.45);
+}
+
+/* Marquee border + section hairlines get warm tint */
+html[data-theme="light"] header,
+html[data-theme="light"] footer {
+  background: #FFFFFF !important;
+  border-color: var(--border-0) !important;
+}
+
+/* ========================================================= */
+/* LIGHT v3 — make every interactive effect POP on cream bg */
+/* ========================================================= */
+
+/* 1. Cursor glow — richer, wider, more visible */
+html[data-theme="light"] .cursor-glow,
+html[data-theme="light"] [class*="cursor-glow"] {
+  display: block !important;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.22) 0%, rgba(180, 83, 9, 0.10) 30%, transparent 70%) !important;
+  mix-blend-mode: multiply;
+}
+
+/* 2. Dot grid — darker base dots + much bigger hover halo */
+html[data-theme="light"] .dot-grid {
+  background-image: radial-gradient(circle, #A89B7E 1.4px, transparent 1.4px) !important;
+  background-size: 22px 22px !important;
+}
+html[data-theme="light"] .dot-grid::after {
+  background-image: radial-gradient(circle, #92400E 2px, transparent 2px) !important;
+  background-size: 22px 22px !important;
+  -webkit-mask-image: radial-gradient(circle 220px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.35) 60%, transparent 100%) !important;
+  mask-image: radial-gradient(circle 220px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.35) 60%, transparent 100%) !important;
+  opacity: 1 !important;
+}
+html[data-theme="light"] .dot-grid:hover::after {
+  opacity: 1 !important;
+}
+
+/* 3. Hero corner labels — dark enough to read */
+html[data-theme="light"] .mono[style*="color: var(--text-2)"] {
+  color: #6B6355 !important;
+}
+
+/* 4. Section hairline in features grid — warmer and visible */
+html[data-theme="light"] .grid-features > * {
+  border-color: var(--border-0) !important;
+}
+
+/* 5. Marquee — darker bullets, readable text */
+html[data-theme="light"] .marquee > span {
+  color: #6B6355 !important;
+}
+html[data-theme="light"] .marquee > span > span:first-child {
+  color: #B45309 !important;
+}
+
+/* 6. Typewriter accent — deep rust, unmistakable */
+html[data-theme="light"] .cursor-blink { color: #B45309 !important; }
+
+/* 7. Scroll progress bar — bolder */
+html[data-theme="light"] [style*="background: var(--accent)"][style*="height: 100%"] {
+  background: #B45309 !important;
+  box-shadow: 0 0 12px rgba(180, 83, 9, 0.4);
+}
+
+/* 8. Hover lift on cards — visible shadow shift */
+html[data-theme="light"] .lift:hover {
+  border-color: #B8AE95 !important;
+  box-shadow:
+    0 6px 16px rgba(94, 60, 20, 0.10),
+    0 16px 40px rgba(94, 60, 20, 0.06) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* 9. Pulse dot — deep green ring */
+html[data-theme="light"] .pulse-dot {
+  background: #15803D !important;
+  box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55) !important;
+}
+
+/* 10. Magnetic button hover — glow visible */
+html[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(180, 83, 9, 0.35), 0 0 0 4px rgba(180, 83, 9, 0.10) !important;
+}
+
+/* 11. Grid bg — stronger top glow */
+html[data-theme="light"] .grid-bg,
+html[data-theme="light"] [aria-hidden].grid-bg {
+  background:
+    radial-gradient(ellipse 90% 65% at 50% -15%, rgba(217, 119, 6, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 90% 15%, rgba(147, 51, 234, 0.06) 0%, transparent 60%),
+    var(--bg-0) !important;
+}
+
+/* 12. Fade-up entrance — flash amber once for visibility */
+@keyframes lightFlash {
+  0% { opacity: 0; transform: translateY(10px); }
+  60% { opacity: 1; transform: translateY(0); box-shadow: 0 0 0 0 rgba(180, 83, 9, 0.3); }
+  100% { opacity: 1; transform: translateY(0); box-shadow: 0 0 0 0 rgba(180, 83, 9, 0); }
+}
+html[data-theme="light"] .fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+
+/* 13. Command palette backdrop — darker for contrast */
+html[data-theme="light"] .cmd-palette-wrap {
+  background: rgba(26, 24, 21, 0.55) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* 14. Command palette items hover — visible amber */
+html[data-theme="light"] .cmd-palette button:hover,
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] {
+  background: #F3EFE6 !important;
+}
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] span:first-child svg,
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] svg {
+  color: #B45309 !important;
+}
+
+/* 15. Toast — warm shadow */
+html[data-theme="light"] .card[style*="box-shadow"] {
+  box-shadow: 0 10px 40px rgba(94, 60, 20, 0.15) !important;
+}
+
+/* ========================================================= */
+/* LIGHT v3 — make every interactive effect POP on cream bg */
+/* ========================================================= */
+
+/* 1. Cursor glow — richer, wider, more visible */
+html[data-theme="light"] .cursor-glow,
+html[data-theme="light"] [class*="cursor-glow"] {
+  display: block !important;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.22) 0%, rgba(180, 83, 9, 0.10) 30%, transparent 70%) !important;
+  mix-blend-mode: multiply;
+}
+
+/* 2. Dot grid — darker base dots + much bigger hover halo */
+html[data-theme="light"] .dot-grid {
+  background-image: radial-gradient(circle, #A89B7E 1.4px, transparent 1.4px) !important;
+  background-size: 22px 22px !important;
+}
+html[data-theme="light"] .dot-grid::after {
+  background-image: radial-gradient(circle, #92400E 2px, transparent 2px) !important;
+  background-size: 22px 22px !important;
+  -webkit-mask-image: radial-gradient(circle 220px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.35) 60%, transparent 100%) !important;
+  mask-image: radial-gradient(circle 220px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.35) 60%, transparent 100%) !important;
+  opacity: 1 !important;
+}
+html[data-theme="light"] .dot-grid:hover::after {
+  opacity: 1 !important;
+}
+
+/* 3. Hero corner labels — dark enough to read */
+html[data-theme="light"] .mono[style*="color: var(--text-2)"] {
+  color: #6B6355 !important;
+}
+
+/* 4. Section hairline in features grid — warmer and visible */
+html[data-theme="light"] .grid-features > * {
+  border-color: var(--border-0) !important;
+}
+
+/* 5. Marquee — darker bullets, readable text */
+html[data-theme="light"] .marquee > span {
+  color: #6B6355 !important;
+}
+html[data-theme="light"] .marquee > span > span:first-child {
+  color: #B45309 !important;
+}
+
+/* 6. Typewriter accent — deep rust, unmistakable */
+html[data-theme="light"] .cursor-blink { color: #B45309 !important; }
+
+/* 7. Scroll progress bar — bolder */
+html[data-theme="light"] [style*="background: var(--accent)"][style*="height: 100%"] {
+  background: #B45309 !important;
+  box-shadow: 0 0 12px rgba(180, 83, 9, 0.4);
+}
+
+/* 8. Hover lift on cards — visible shadow shift */
+html[data-theme="light"] .lift:hover {
+  border-color: #B8AE95 !important;
+  box-shadow:
+    0 6px 16px rgba(94, 60, 20, 0.10),
+    0 16px 40px rgba(94, 60, 20, 0.06) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* 9. Pulse dot — deep green ring */
+html[data-theme="light"] .pulse-dot {
+  background: #15803D !important;
+  box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55) !important;
+}
+
+/* 10. Magnetic button hover — glow visible */
+html[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(180, 83, 9, 0.35), 0 0 0 4px rgba(180, 83, 9, 0.10) !important;
+}
+
+/* 11. Grid bg — stronger top glow */
+html[data-theme="light"] .grid-bg,
+html[data-theme="light"] [aria-hidden].grid-bg {
+  background:
+    radial-gradient(ellipse 90% 65% at 50% -15%, rgba(217, 119, 6, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 90% 15%, rgba(147, 51, 234, 0.06) 0%, transparent 60%),
+    var(--bg-0) !important;
+}
+
+/* 12. Fade-up entrance — flash amber once for visibility */
+@keyframes lightFlash {
+  0% { opacity: 0; transform: translateY(10px); }
+  60% { opacity: 1; transform: translateY(0); box-shadow: 0 0 0 0 rgba(180, 83, 9, 0.3); }
+  100% { opacity: 1; transform: translateY(0); box-shadow: 0 0 0 0 rgba(180, 83, 9, 0); }
+}
+html[data-theme="light"] .fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+
+/* 13. Command palette backdrop — darker for contrast */
+html[data-theme="light"] .cmd-palette-wrap {
+  background: rgba(26, 24, 21, 0.55) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* 14. Command palette items hover — visible amber */
+html[data-theme="light"] .cmd-palette button:hover,
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] {
+  background: #F3EFE6 !important;
+}
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] span:first-child svg,
+html[data-theme="light"] .cmd-palette button[style*="background: var(--bg-2)"] svg {
+  color: #B45309 !important;
+}
+
+/* 15. Toast — warm shadow */
+html[data-theme="light"] .card[style*="box-shadow"] {
+  box-shadow: 0 10px 40px rgba(94, 60, 20, 0.15) !important;
+}
+
+/* === CURSOR GLOW — theme-driven === */
+:root {
+  --cursor-glow-1: radial-gradient(circle, rgba(242, 183, 5, 0.09) 0%, transparent 65%);
+  --cursor-glow-2: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+}
+
+html[data-theme="light"] {
+  --cursor-glow-1: radial-gradient(circle, rgba(217, 119, 6, 0.28) 0%, rgba(180, 83, 9, 0.10) 35%, transparent 70%);
+  --cursor-glow-2: radial-gradient(circle, rgba(147, 51, 234, 0.10) 0%, transparent 60%);
+}
+
+/* === DOT GRID — theme-driven === */
+:root {
+  --dot-base: #262A32;
+  --dot-live: #F2B705;
+}
+html[data-theme="light"] {
+  --dot-base: #B8AE95;
+  --dot-live: #92400E;
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, var(--dot-base) 1.4px, transparent 1.4px) !important;
+  background-size: 22px 22px !important;
+}
+.dot-grid::after {
+  background-image: radial-gradient(circle, var(--dot-live) 2px, transparent 2px) !important;
+  background-size: 22px 22px !important;
+  -webkit-mask-image: radial-gradient(circle 200px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.4) 55%, transparent 100%) !important;
+  mask-image: radial-gradient(circle 200px at var(--mx, 50%) var(--my, 50%), black 0%, rgba(0,0,0,0.4) 55%, transparent 100%) !important;
+  opacity: 1 !important;
+}
+.dot-grid:hover::after { opacity: 1 !important; }
+
+/* Light cursor glow — tuned down */
+html[data-theme="light"] {
+  --cursor-glow-1: radial-gradient(circle, rgba(217, 119, 6, 0.14) 0%, rgba(180, 83, 9, 0.05) 40%, transparent 75%);
+  --cursor-glow-2: radial-gradient(circle, rgba(147, 51, 234, 0.05) 0%, transparent 60%);
+}

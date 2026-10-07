@@ -31,7 +31,7 @@ export function OfferModal({ listingId, price, onClose }: { listingId: string; p
     <div style={{ position: "fixed", inset: 0, background: "rgba(11,30,63,0.5)", display: "grid", placeItems: "center", zIndex: 100, padding: "1rem" }} onClick={onClose}>
       <div className="card" style={{ padding: "1.5rem", width: "100%", maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-          <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.15rem" }}>Make an offer</div>
+          <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.15rem" }}>Make an offer</div>
           <button onClick={onClose} className="btn btn-outline" style={{ padding: "0.3rem 0.5rem" }}><X size={14} /></button>
         </div>
 
@@ -39,10 +39,10 @@ export function OfferModal({ listingId, price, onClose }: { listingId: string; p
 
         {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
 
-        <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Your offer (₹)</label>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Your offer (₹)</label>
         <input className="input" type="number" min={1} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
 
-        <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", margin: "0.85rem 0 0.35rem" }}>Message (optional)</label>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", margin: "0.85rem 0 0.35rem" }}>Message (optional)</label>
         <textarea className="textarea" rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Meet at library entrance?" />
 
         <button className="btn btn-primary" style={{ width: "100%", marginTop: "1rem" }} onClick={submit} disabled={busy || amount <= 0}>

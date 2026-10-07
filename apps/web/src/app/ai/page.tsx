@@ -51,10 +51,10 @@ export default function AiSearchPage() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", color: "var(--navy)", fontWeight: 700, fontSize: "0.85rem" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", color: "var(--text-0)", fontWeight: 700, fontSize: "0.85rem" }}>
           <Sparkles size={16} /> AI-powered search
         </div>
-        <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.5rem" }}>Just describe what you need</h1>
+        <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.5rem" }}>Just describe what you need</h1>
         <p style={{ fontSize: "0.95rem", color: "#64748b" }}>Type it naturally. We'll extract the filters and find it.</p>
       </div>
 
@@ -110,13 +110,13 @@ export default function AiSearchPage() {
             </div>
           </div>
 
-          <div style={{ marginBottom: "1rem", fontWeight: 700, color: "var(--navy)" }}>
+          <div style={{ marginBottom: "1rem", fontWeight: 700, color: "var(--text-0)" }}>
             {data.count} {data.count === 1 ? "result" : "results"}
           </div>
 
           {data.count === 0 ? (
             <div className="card" style={{ padding: "2.5rem 1.5rem", textAlign: "center" }}>
-              <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem" }}>Nothing matched that search.</div>
+              <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>Nothing matched that search.</div>
               <div style={{ fontSize: "0.9rem" }}>Try widening the price range or post a Wanted request so sellers can find you.</div>
             </div>
           ) : (
@@ -131,9 +131,9 @@ export default function AiSearchPage() {
                       <span className="badge badge-condition">{l.condition.replace("_", " ")}</span>
                       {l.status === "SOLD" && <span className="badge badge-sold">Sold</span>}
                     </div>
-                    <div style={{ fontWeight: 700, color: "var(--navy)", fontSize: "0.95rem", marginBottom: "0.35rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
+                    <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", marginBottom: "0.35rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontWeight: 800, color: "var(--navy)" }}>{formatINR(l.price)}</span>
+                      <span style={{ fontWeight: 800, color: "var(--text-0)" }}>{formatINR(l.price)}</span>
                       <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{timeAgo(l.created_at)}</span>
                     </div>
                   </div>

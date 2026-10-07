@@ -30,6 +30,11 @@ export function RealtimeBridge() {
         qc.invalidateQueries({ queryKey: ["wanted-bids"] });
         push({ title: "New bid on your wanted post", body: e.title ? `${e.title} — ₹${e.bid_price}` : undefined, href: `/wanted/${e.wanted_post_id}` });
         break;
+      case "notification.created":
+        qc.invalidateQueries({ queryKey: ["notifications"] });
+        qc.invalidateQueries({ queryKey: ["notif-unread"] });
+        if (e.title) push({ title: e.title, body: e.body, href: e.href, kind: e.notification_type === "handover.verified" ? "success" : "info" });
+        break;
       case "handover.verified":
         qc.invalidateQueries({ queryKey: ["handover"] });
         push({ title: "Handover verified ✓", body: "Deal marked complete", kind: "success" });

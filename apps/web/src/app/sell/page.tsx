@@ -80,7 +80,7 @@ export default function SellPage() {
     return (
       <div style={{ maxWidth: 480, margin: "3rem auto", textAlign: "center" }} className="card">
         <div style={{ padding: "2.5rem 1.5rem" }}>
-          <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.3rem", marginBottom: "0.5rem" }}>Sign in to sell</div>
+          <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.3rem", marginBottom: "0.5rem" }}>Sign in to sell</div>
           <p style={{ fontSize: "0.9rem", marginBottom: "1.25rem" }}>Only verified students can post listings.</p>
           <Link href="/login?next=/sell" className="btn btn-primary">Sign in</Link>
         </div>
@@ -90,7 +90,7 @@ export default function SellPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: "2rem auto" }}>
-      <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.35rem" }}>Post an item</h1>
+      <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.35rem" }}>Post an item</h1>
       <p style={{ fontSize: "0.9rem", marginBottom: "1.5rem" }}>Describe it clearly. Honest listings sell faster.</p>
 
       {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
@@ -113,25 +113,25 @@ export default function SellPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div>
-          <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Title</label>
+          <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Title</label>
           <input className="input" placeholder="Casio FX-991CW" {...register("title")} />
           {errors.title && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.title.message}</p>}
         </div>
 
         <div>
-          <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Description</label>
+          <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Description</label>
           <textarea className="textarea" rows={5} placeholder="Condition, accessories, reason for selling..." {...register("description")} />
           {errors.description && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.description.message}</p>}
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <div>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Price (₹)</label>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Price (₹)</label>
             <input className="input" type="number" min={0} {...register("price")} />
             {errors.price && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.price.message}</p>}
           </div>
           <div>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Category</label>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Category</label>
             <select className="select" {...register("category_id")}>
               <option value="">Select category</option>
               {categories?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -141,13 +141,13 @@ export default function SellPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <div>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Condition</label>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Condition</label>
             <select className="select" {...register("condition")}>
               {CONDITIONS.map((c) => <option key={c.v} value={c.v}>{c.l}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Listing type</label>
+            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Listing type</label>
             <select className="select" {...register("type")}>
               {TYPES.map((t) => <option key={t.v} value={t.v}>{t.l}</option>)}
             </select>

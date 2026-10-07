@@ -46,7 +46,7 @@ export default function WantedListPage() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
         <div>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--navy)" }}>Wanted</h1>
+          <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-0)" }}>Wanted</h1>
           <p style={{ fontSize: "0.9rem" }}>What students are looking for right now.</p>
         </div>
         {user && (
@@ -60,27 +60,27 @@ export default function WantedListPage() {
         <div className="card" style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
           <div style={{ display: "grid", gap: "1rem" }}>
             <div>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>What do you need?</label>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>What do you need?</label>
               <input className="input" placeholder="Casio FX-991CW" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
             <div>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Details</label>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Details</label>
               <textarea className="textarea" rows={3} placeholder="Needed for exams next week, budget tight..." value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
               <div>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Max price (₹)</label>
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Max price (₹)</label>
                 <input className="input" type="number" min={1} value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} />
               </div>
               <div>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Min condition</label>
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Min condition</label>
                 <select className="select" value={minCondition} onChange={(e) => setMinCondition(e.target.value)}>
                   <option value="NEW">New</option><option value="LIKE_NEW">Like new</option>
                   <option value="GOOD">Good</option><option value="FAIR">Fair</option><option value="POOR">Poor</option>
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Category</label>
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Category</label>
                 <select className="select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
                   <option value="">Any</option>
                   {categories?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -105,7 +105,7 @@ export default function WantedListPage() {
       {!isLoading && (!data || data.length === 0) && (
         <div className="card" style={{ padding: "3rem 1.5rem", textAlign: "center" }}>
           <Megaphone size={40} style={{ color: "#94a3b8", margin: "0 auto 0.75rem" }} />
-          <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem" }}>No wanted posts yet.</div>
+          <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>No wanted posts yet.</div>
           <div style={{ fontSize: "0.9rem" }}>Be the first — tell sellers what you need.</div>
         </div>
       )}
@@ -118,13 +118,13 @@ export default function WantedListPage() {
                 <span className="badge badge-verified">Wanted</span>
                 <span className="badge badge-condition">{w.min_condition.replace("_", " ")}</span>
               </div>
-              <div style={{ fontWeight: 700, color: "var(--navy)", fontSize: "1.05rem", marginBottom: "0.25rem" }}>{w.title}</div>
+              <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "1.05rem", marginBottom: "0.25rem" }}>{w.title}</div>
               <div style={{ fontSize: "0.88rem", color: "#64748b", marginBottom: "0.35rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.description}</div>
               <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>{timeAgo(w.created_at)}</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 600, textTransform: "uppercase" }}>Max</div>
-              <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.3rem" }}>{formatINR(w.max_price)}</div>
+              <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.3rem" }}>{formatINR(w.max_price)}</div>
             </div>
           </div>
         </Link>

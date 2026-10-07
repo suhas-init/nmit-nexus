@@ -53,7 +53,7 @@ export default function WantedDetailPage() {
 
   return (
     <div>
-      <Link href="/wanted" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--navy)", fontWeight: 600 }}>
+      <Link href="/wanted" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--text-0)", fontWeight: 600 }}>
         <ArrowLeft size={15} /> Back to Wanted
       </Link>
 
@@ -63,17 +63,17 @@ export default function WantedDetailPage() {
           <span className="badge badge-condition">{w.min_condition.replace("_", " ")}</span>
           {w.status === "FULFILLED" && <span className="badge badge-active">Fulfilled</span>}
         </div>
-        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.5rem" }}>{w.title}</h1>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.5rem" }}>{w.title}</h1>
         <div style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "1rem" }}>Posted {timeAgo(w.created_at)}</div>
         <p style={{ fontSize: "0.95rem", lineHeight: 1.6, whiteSpace: "pre-wrap", marginBottom: "1rem" }}>{w.description}</p>
         <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", padding: "0.85rem", background: "#f7f8fb", borderRadius: 10 }}>
           <div>
             <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Max price</div>
-            <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.2rem" }}>{formatINR(w.max_price)}</div>
+            <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.2rem" }}>{formatINR(w.max_price)}</div>
           </div>
           <div>
             <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Min condition</div>
-            <div style={{ fontWeight: 700, color: "var(--navy)" }}>{w.min_condition.replace("_", " ")}</div>
+            <div style={{ fontWeight: 700, color: "var(--text-0)" }}>{w.min_condition.replace("_", " ")}</div>
           </div>
         </div>
       </div>
@@ -82,16 +82,16 @@ export default function WantedDetailPage() {
 
       {user && !isOwner && w.status === "OPEN" && (
         <div className="card" style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
-          <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <Megaphone size={16} /> Have one? Bid on this request.
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr auto", gap: "0.75rem", alignItems: "end" }}>
             <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Your price (₹)</label>
+              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Your price (₹)</label>
               <input className="input" type="number" min={1} value={bidPrice || ""} onChange={(e) => setBidPrice(Number(e.target.value))} placeholder="850" />
             </div>
             <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Message</label>
+              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Message</label>
               <input className="input" value={bidMsg} onChange={(e) => setBidMsg(e.target.value)} placeholder="I have one, good condition" />
             </div>
             <button className="btn btn-gold" onClick={submitBid} disabled={busy || bidPrice <= 0}>{busy ? "…" : "Send bid"}</button>
@@ -102,16 +102,16 @@ export default function WantedDetailPage() {
 
       {isOwner && (
         <div>
-          <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: "1rem" }}>Bids ({bids?.length || 0})</h2>
+          <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "1rem" }}>Bids ({bids?.length || 0})</h2>
           {!bids || bids.length === 0 ? (
             <div className="card" style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>No bids yet. Sellers will start bidding shortly.</div>
           ) : (
             bids.map((b, i) => (
-              <div key={b.id} className="card" style={{ padding: "1rem 1.25rem", marginBottom: "0.75rem", borderColor: i === 0 ? "var(--gold)" : undefined, borderWidth: i === 0 ? 2 : 1 }}>
+              <div key={b.id} className="card" style={{ padding: "1rem 1.25rem", marginBottom: "0.75rem", borderColor: i === 0 ? "var(--accent)" : undefined, borderWidth: i === 0 ? 2 : 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                   <div style={{ minWidth: 0 }}>
                     {i === 0 && <span className="badge badge-verified" style={{ marginBottom: "0.35rem" }}><Trophy size={11} /> Best bid</span>}
-                    <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.2rem" }}>{formatINR(b.bid_price)}</div>
+                    <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.2rem" }}>{formatINR(b.bid_price)}</div>
                     {b.message && <div style={{ fontSize: "0.88rem", marginTop: "0.35rem" }}>"{b.message}"</div>}
                     <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginTop: "0.35rem" }}>{timeAgo(b.created_at)}</div>
                   </div>

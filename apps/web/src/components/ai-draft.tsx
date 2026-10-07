@@ -47,11 +47,16 @@ export function AiDraft({
   };
 
   return (
-    <div className="card" style={{ padding: "1.25rem", marginBottom: "1rem", background: "linear-gradient(135deg, #f7f8fb 0%, #eef4ff 100%)", borderColor: "#dde3ed" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem", fontWeight: 700, color: "var(--navy)", fontSize: "0.9rem" }}>
-        <Sparkles size={16} /> AI Listing Copilot
+    <div className="card spotlight" style={{
+      padding: "1.25rem",
+      marginBottom: "1rem",
+      background: "linear-gradient(135deg, rgba(139,92,246,0.10) 0%, rgba(34,211,238,0.06) 100%)",
+      borderColor: "rgba(139,92,246,0.30)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem", fontWeight: 700, color: "var(--violet)", fontSize: "0.85rem", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
+        <Sparkles size={15} /> AI_LISTING_COPILOT
       </div>
-      <div style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "0.75rem" }}>
+      <div style={{ fontSize: "0.82rem", color: "var(--text-1)", marginBottom: "0.75rem" }}>
         Describe your item in rough words. I'll write the title, description, price range, and pick a category.
       </div>
       <textarea
@@ -62,35 +67,33 @@ export function AiDraft({
         onChange={(e) => setText(e.target.value)}
       />
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "0.6rem" }}>
-        <button type="button" className="btn btn-primary" onClick={run} disabled={busy || text.trim().length < 5}>
+        <button type="button" className="btn btn-violet" onClick={run} disabled={busy || text.trim().length < 5}>
           {busy ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}
           {busy ? "Thinking…" : "Generate draft"}
         </button>
       </div>
 
-      {err && <div style={{ marginTop: "0.75rem", color: "#b42318", fontSize: "0.85rem" }}>{err}</div>}
+      {err && <div style={{ marginTop: "0.75rem", color: "var(--red)", fontSize: "0.85rem", fontFamily: "var(--font-mono)" }}>{err}</div>}
 
       {draft && (
-        <div style={{ marginTop: "1rem", padding: "1rem", background: "white", borderRadius: 10, border: "1px solid var(--border)" }}>
-          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", marginBottom: "0.5rem" }}>Preview</div>
-          <div style={{ fontWeight: 700, color: "var(--navy)", fontSize: "1rem", marginBottom: "0.4rem" }}>{draft.title}</div>
-          <div style={{ fontSize: "0.85rem", color: "#334155", marginBottom: "0.75rem", whiteSpace: "pre-wrap" }}>{draft.description}</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.75rem" }}>
-            <span className="badge badge-active">
-              ₹{draft.suggested_price_min}–{draft.suggested_price_max}
-            </span>
+        <div style={{ marginTop: "1rem", padding: "1rem", background: "var(--bg-2)", borderRadius: 10, border: "1px solid var(--border-1)" }}>
+          <div className="term-label" style={{ marginBottom: "0.6rem" }}>DRAFT_PREVIEW</div>
+          <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "1rem", marginBottom: "0.4rem" }}>{draft.title}</div>
+          <div style={{ fontSize: "0.85rem", color: "var(--text-1)", marginBottom: "0.85rem", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{draft.description}</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.85rem" }}>
+            <span className="badge badge-active">₹{draft.suggested_price_min}–{draft.suggested_price_max}</span>
             <span className="badge badge-condition">{draft.condition.replace("_", " ")}</span>
-            <span className="badge badge-verified">{draft.category_slug}</span>
+            <span className="badge badge-violet">{draft.category_slug}</span>
             {draft.tags?.slice(0, 3).map((t) => (
               <span key={t} className="badge badge-condition">#{t}</span>
             ))}
           </div>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button type="button" className="btn btn-primary" onClick={accept} style={{ padding: "0.4rem 0.85rem", fontSize: "0.85rem" }}>
-              <Check size={14} /> Use this draft
+            <button type="button" className="btn btn-primary" onClick={accept} style={{ padding: "0.45rem 0.9rem", fontSize: "0.75rem" }}>
+              <Check size={13} /> Use this draft
             </button>
-            <button type="button" className="btn btn-outline" onClick={() => setDraft(null)} style={{ padding: "0.4rem 0.85rem", fontSize: "0.85rem" }}>
-              <X size={14} /> Discard
+            <button type="button" className="btn btn-outline" onClick={() => setDraft(null)} style={{ padding: "0.45rem 0.9rem", fontSize: "0.75rem" }}>
+              <X size={13} /> Discard
             </button>
           </div>
         </div>

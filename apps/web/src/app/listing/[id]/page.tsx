@@ -8,6 +8,7 @@ import { formatINR, timeAgo } from "@/lib/utils";
 import { ArrowLeft, MapPin, ShieldCheck, Trash2, CheckCircle2 } from "lucide-react";
 import { OfferModal } from "@/components/offer-modal";
 import { PricePulse } from "@/components/price-pulse";
+import { CopyId } from "@/components/copy-id";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -48,13 +49,13 @@ export default function ListingDetailPage() {
 
   return (
     <div>
-      <Link href="/marketplace" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--navy)", fontWeight: 600 }}>
+      <Link href="/marketplace" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--text-0)", fontWeight: 600 }}>
         <ArrowLeft size={15} /> Back to marketplace
       </Link>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "1.5rem", alignItems: "start" }}>
+      <div className="detail-split" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "1.5rem", alignItems: "start" }}>
         <div className="card" style={{ padding: "1.5rem" }}>
-          <div style={{ height: 320, background: "linear-gradient(135deg, #eef1f7 0%, #dce3ef 100%)", borderRadius: 12, display: "grid", placeItems: "center", marginBottom: "1.25rem", color: "#94a3b8", fontWeight: 700, fontSize: "2rem" }}>
+          <div className="thumb" style={{ height: 320, borderRadius: 12, marginBottom: "1.25rem", fontSize: "3rem" }}>
             {listing.title.slice(0, 2).toUpperCase()}
           </div>
           <div style={{ display: "flex", gap: "0.4rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
@@ -62,14 +63,17 @@ export default function ListingDetailPage() {
             <span className="badge badge-condition">{listing.type}</span>
             {listing.status === "SOLD" ? <span className="badge badge-sold">Sold</span> : <span className="badge badge-active">Available</span>}
           </div>
-          <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.5rem" }}>{listing.title}</h1>
-          <div style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "1rem" }}>Listed {timeAgo(listing.created_at)}</div>
+          <h1 style={{ fontSize: "1.7rem", fontWeight: 800, color: "var(--text-0)", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>{listing.title}</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+            <div className="mono" style={{ fontSize: "0.72rem", color: "var(--text-2)" }}>listed {timeAgo(listing.created_at)}</div>
+            <CopyId value={listing.id} label="listing" />
+          </div>
           <p style={{ fontSize: "0.95rem", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{listing.description}</p>
         </div>
 
-        <aside style={{ position: "sticky", top: 90 }}>
+        <aside className="sidebar-sticky" style={{ position: "sticky", top: 90 }}>
           <div className="card" style={{ padding: "1.5rem", marginBottom: "1rem" }}>
-            <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.25rem" }}>{formatINR(listing.price)}</div>
+            <div style={{ fontSize: "2.1rem", fontWeight: 800, color: "var(--accent)", fontFamily: "var(--font-mono)", marginBottom: "0.25rem" }}>{formatINR(listing.price)}</div>
             <div style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "1.25rem" }}>Negotiable · Campus only</div>
 
             {!user && (
@@ -104,7 +108,7 @@ export default function ListingDetailPage() {
           </div>
 
           <div className="card" style={{ padding: "1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", fontWeight: 700, color: "var(--navy)", fontSize: "0.9rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", fontWeight: 700, color: "var(--text-0)", fontSize: "0.9rem" }}>
               <ShieldCheck size={16} style={{ color: "#1e7a3f" }} /> Trusted seller
             </div>
             <div style={{ fontSize: "0.85rem", marginBottom: "0.35rem" }}>Campus verified</div>

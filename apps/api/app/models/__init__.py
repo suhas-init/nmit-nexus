@@ -6,5 +6,6 @@ from app.models.conversation import Conversation, Message, Offer
 from app.models.handover import Handover
 from app.models.wanted import WantedPost, WantedBid
 from app.models.rating import Rating
+from app.models.notification import Notification
 
-__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover", "WantedPost", "WantedBid", "Rating"]
+__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover", "WantedPost", "WantedBid", "Rating", "Notification"]

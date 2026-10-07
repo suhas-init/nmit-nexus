@@ -52,7 +52,7 @@ export default function HandoverPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: "2rem auto" }}>
-      <Link href="/offers" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--navy)", fontWeight: 600 }}>
+      <Link href="/offers" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--text-0)", fontWeight: 600 }}>
         <ArrowLeft size={15} /> Back
       </Link>
 
@@ -60,7 +60,7 @@ export default function HandoverPage() {
         <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", color: "#1e7a3f", fontWeight: 700, fontSize: "0.85rem" }}>
           <ShieldCheck size={16} /> QR-verified handover
         </div>
-        <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.35rem" }}>{data.listing_title}</h1>
+        <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.35rem" }}>{data.listing_title}</h1>
         <p style={{ fontSize: "0.9rem", color: "#94a3b8", marginBottom: "1.5rem" }}>
           {data.verified ? "Handover complete." : "Meet in person. Show your code, enter theirs."}
         </p>
@@ -68,10 +68,10 @@ export default function HandoverPage() {
         {data.verified ? (
           <div>
             <CheckCircle2 size={56} style={{ color: "#1e7a3f", margin: "0 auto 1rem" }} />
-            <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.2rem", marginBottom: "0.5rem" }}>Deal complete ✓</div>
+            <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.2rem", marginBottom: "0.5rem" }}>Deal complete ✓</div>
             <div style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "1rem" }}>Digital receipt issued to both parties.</div>
             <div className="card" style={{ padding: "0.85rem", background: "#f7f8fb", textAlign: "left", fontSize: "0.78rem", fontFamily: "monospace", wordBreak: "break-all" }}>
-              <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem", fontFamily: "inherit" }}>Receipt hash</div>
+              <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem", fontFamily: "inherit" }}>Receipt hash</div>
               {data.receipt_hash}
             </div>
             <RateDeal offerId={offerId} accessToken={accessToken!} />
@@ -80,7 +80,7 @@ export default function HandoverPage() {
           <>
             <div style={{ padding: "1.5rem", background: "#f7f8fb", borderRadius: 12, display: "inline-block", marginBottom: "1.5rem" }}>
               <QRCodeSVG value={myToken || ""} size={180} level="M" />
-              <div style={{ marginTop: "0.85rem", fontWeight: 700, color: "var(--navy)", fontFamily: "monospace", fontSize: "1.4rem", letterSpacing: "0.1em" }}>
+              <div style={{ marginTop: "0.85rem", fontWeight: 700, color: "var(--text-0)", fontFamily: "monospace", fontSize: "1.4rem", letterSpacing: "0.1em" }}>
                 {myToken}
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function HandoverPage() {
 
             <div style={{ display: "flex", gap: "0.5rem", padding: "1rem", background: "#eef1f7", borderRadius: 12 }}>
               <div style={{ textAlign: "left", flex: 1 }}>
-                <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--navy)" }}>Status</div>
+                <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-0)" }}>Status</div>
                 <div style={{ fontSize: "0.85rem", marginTop: "0.3rem" }}>
                   You: <strong>{myConfirmed ? "confirmed ✓" : "waiting"}</strong>
                   <br />
@@ -104,7 +104,7 @@ export default function HandoverPage() {
             </div>
 
             <div style={{ marginTop: "1.5rem", textAlign: "left" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>
+              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>
                 <KeyRound size={13} style={{ display: "inline", marginRight: 4 }} />
                 Enter the other party's code
               </label>
@@ -163,12 +163,12 @@ function RateDeal({ offerId, accessToken }: { offerId: string; accessToken: stri
 
   return (
     <div style={{ marginTop: "1.5rem", textAlign: "left", borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
-      <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rate this deal</div>
+      <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rate this deal</div>
       <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem" }}>
         {[1,2,3,4,5].map((n) => (
           <button key={n} type="button" onClick={() => setRating(n)} onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)}
             style={{ background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
-            <Star size={26} fill={(hover || rating) >= n ? "var(--gold)" : "none"} color={(hover || rating) >= n ? "var(--gold)" : "#cbd5e1"} />
+            <Star size={26} fill={(hover || rating) >= n ? "var(--accent)" : "none"} color={(hover || rating) >= n ? "var(--accent)" : "#cbd5e1"} />
           </button>
         ))}
       </div>

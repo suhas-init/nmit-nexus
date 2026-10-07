@@ -10,6 +10,7 @@ from app.models.user import User
 from app.models.conversation import Conversation, Message, Offer
 from app.schemas.offer import ConversationOut, MessageCreate, MessageOut, OfferCreate, OfferOut
 from app.ws.manager import manager
+from app.services.notification import notify
 
 router = APIRouter(tags=["offers"])
 
@@ -84,6 +85,13 @@ async def create_offer(
         "offer_price": float(offer.offer_price),
         "buyer_id": str(user.id),
     })
+    await notify(db, str(listing.seller_id), "offer.created", {
+        "title": f"New offer on {listing.title}",
+        "body": f"₹{float(offer.offer_price):.0f}",
+        "href": "/offers",
+        "offer_id": str(offer.id),
+    })
+    await db.commit()
     return _offer_out(offer)
 
 
@@ -194,4 +202,10 @@ async def send_message(
         "type": "message.created",
         "conversation_id": str(conversation_id),
     })
+    await notify(db, str(recipient), "message.created", {
+        "title": "New message",
+        "href": f"/conversations/{conversation_id}",
+        "conversation_id": str(conversation_id),
+    })
+    await db.commit()
     return _msg_out(msg)

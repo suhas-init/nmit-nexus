@@ -63,7 +63,7 @@ export function PricePulse({ listingId }: { listingId: string }) {
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#94a3b8" }}>
         <span>{formatINR(lo)}</span>
-        <span style={{ fontWeight: 700, color: "var(--navy)" }}>you: {formatINR(data.target_price!)}</span>
+        <span style={{ fontWeight: 700, color: "var(--text-0)" }}>you: {formatINR(data.target_price!)}</span>
         <span>{formatINR(hi)}</span>
       </div>
       <div style={{ fontSize: "0.72rem", color: "#94a3b8", marginTop: "0.5rem" }}>Based on {data.sample_size} similar campus listings</div>

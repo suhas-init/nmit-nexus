@@ -61,11 +61,11 @@ export default function OffersPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--navy)", marginBottom: "0.35rem" }}>Offers</h1>
+      <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.35rem" }}>Offers</h1>
       <p style={{ fontSize: "0.9rem", marginBottom: "2rem" }}>Manage offers on your listings and offers you've made.</p>
 
       <section style={{ marginBottom: "2.5rem" }}>
-        <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+        <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
           <Inbox size={18} /> Received (on your listings)
         </h2>
 
@@ -73,21 +73,21 @@ export default function OffersPage() {
 
         {!isLoading && (!offers || offers.length === 0) && (
           <div className="card" style={{ padding: "2.5rem 1.5rem", textAlign: "center" }}>
-            <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem" }}>No incoming offers yet.</div>
+            <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>No incoming offers yet.</div>
             <div style={{ fontSize: "0.9rem" }}>When buyers make offers, they'll appear here.</div>
           </div>
         )}
 
         {!isLoading && offers && offers.map((o) => (
           <div key={o.id} className="card" style={{ padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div className="row-stack" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
               <div style={{ minWidth: 0 }}>
-                <Link href={`/listing/${o.listing_id}`} style={{ fontWeight: 700, color: "var(--navy)", fontSize: "0.95rem" }}>{o.listing_title}</Link>
+                <Link href={`/listing/${o.listing_id}`} style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem" }}>{o.listing_title}</Link>
                 <div style={{ fontSize: "0.82rem", color: "#94a3b8", marginTop: "0.15rem" }}>{timeAgo(o.created_at)}</div>
                 {o.message && <div style={{ fontSize: "0.88rem", marginTop: "0.5rem" }}>"{o.message}"</div>}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <span style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.1rem" }}>{formatINR(o.offer_price)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.1rem" }}>{formatINR(o.offer_price)}</span>
                 {o.status === "PENDING" ? (
                   <>
                     <button className="btn btn-primary" style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem" }} onClick={() => respond(o.id, "accept")}>Accept</button>
@@ -105,22 +105,22 @@ export default function OffersPage() {
       </section>
 
       <section>
-        <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+        <h2 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
           <Send size={18} /> Sent (offers you made)
         </h2>
 
         {(!myOffers || myOffers.length === 0) && (
           <div className="card" style={{ padding: "2.5rem 1.5rem", textAlign: "center" }}>
-            <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem" }}>You haven't made any offers.</div>
+            <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>You haven't made any offers.</div>
             <div style={{ fontSize: "0.9rem" }}>Browse the marketplace and make an offer on something you want.</div>
           </div>
         )}
 
         {myOffers?.map((o) => (
           <div key={o.id} className="card" style={{ padding: "1rem 1.25rem", marginBottom: "0.75rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div className="row-stack" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
               <div style={{ minWidth: 0 }}>
-                <Link href={`/listing/${o.listing_id}`} style={{ fontWeight: 700, color: "var(--navy)", fontSize: "0.95rem" }}>{o.listing_title}</Link>
+                <Link href={`/listing/${o.listing_id}`} style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem" }}>{o.listing_title}</Link>
                 <div style={{ fontSize: "0.82rem", color: "#94a3b8", marginTop: "0.15rem" }}>You offered {formatINR(o.offer_price)} · {timeAgo(o.created_at)}</div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>

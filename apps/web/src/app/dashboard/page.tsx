@@ -18,7 +18,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="card" style={{ padding: "3rem 1.5rem", textAlign: "center", maxWidth: 480, margin: "3rem auto" }}>
-        <div style={{ fontWeight: 800, color: "var(--navy)", fontSize: "1.3rem", marginBottom: "0.5rem" }}>Sign in required</div>
+        <div style={{ fontWeight: 800, color: "var(--text-0)", fontSize: "1.3rem", marginBottom: "0.5rem" }}>Sign in required</div>
         <p style={{ fontSize: "0.9rem", marginBottom: "1.25rem" }}>Please sign in to view your dashboard.</p>
         <Link href="/login?next=/dashboard" className="btn btn-primary">Sign in</Link>
       </div>
@@ -32,11 +32,11 @@ export default function DashboardPage() {
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--navy)" }}>Hi, {user.name.split(" ")[0]} 👋</h1>
+        <h1 style={{ fontSize: "1.8rem", fontWeight: 800, color: "var(--text-0)" }}>Hi, {user.name.split(" ")[0]} 👋</h1>
         <p style={{ fontSize: "0.9rem" }}>Manage your listings and track your activity.</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+      <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
         {[
           { icon: Package, label: "Active listings", value: active.length },
           { icon: CheckCircle2, label: "Sold", value: sold.length },
@@ -49,7 +49,7 @@ export default function DashboardPage() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#94a3b8", fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "0.5rem" }}>
                 <Icon size={14} /> {s.label}
               </div>
-              <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>{s.value}</div>
+              <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--text-0)" }}>{s.value}</div>
             </div>
           );
         })}
@@ -63,16 +63,16 @@ export default function DashboardPage() {
       )}
 
       <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h2 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)" }}>My listings</h2>
+        <h2 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--text-0)" }}>My listings</h2>
         <Link href="/sell" className="btn btn-primary" style={{ padding: "0.45rem 0.9rem", fontSize: "0.85rem" }}>+ New listing</Link>
       </div>
 
-      {isLoading && <div className="card" style={{ height: 160, background: "#eef1f7" }} />}
+      {isLoading && <div className="card" style={{ height: 160, background: "var(--bg-2)" }} />}
 
       {!isLoading && mine.length === 0 && (
         <div className="card" style={{ padding: "3rem 1.5rem", textAlign: "center" }}>
           <PackageOpen size={40} style={{ color: "#94a3b8", margin: "0 auto 0.75rem" }} />
-          <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem" }}>You haven’t posted anything yet.</div>
+          <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>You haven’t posted anything yet.</div>
           <div style={{ fontSize: "0.9rem", marginBottom: "1.25rem" }}>Post your first listing to get started.</div>
           <Link href="/sell" className="btn btn-gold">Post an item</Link>
         </div>
@@ -83,16 +83,16 @@ export default function DashboardPage() {
           {mine.map((l) => (
             <Link key={l.id} href={`/listing/${l.id}`} className="card" style={{ padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", minWidth: 0, flex: 1 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 10, background: "linear-gradient(135deg, #eef1f7 0%, #dce3ef 100%)", display: "grid", placeItems: "center", fontWeight: 700, color: "#94a3b8", fontSize: "0.75rem", flexShrink: 0 }}>
+                <div className="thumb" style={{ width: 48, height: 48, borderRadius: 10, fontSize: "0.75rem", flexShrink: 0 }}>
                   {l.title.slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: "var(--navy)", fontSize: "0.95rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
+                  <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
                   <div style={{ fontSize: "0.78rem", color: "#94a3b8" }}>{timeAgo(l.created_at)}</div>
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <span style={{ fontWeight: 800, color: "var(--navy)" }}>{formatINR(l.price)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text-0)" }}>{formatINR(l.price)}</span>
                 {l.status === "SOLD" ? <span className="badge badge-sold">Sold</span> : <span className="badge badge-active">Active</span>}
               </div>
             </Link>

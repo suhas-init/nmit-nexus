@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.wanted import WantedPost, WantedBid
 from app.ws.manager import manager
+from app.services.notification import notify
 
 router = APIRouter(prefix="/wanted", tags=["wanted"])
 
@@ -139,6 +140,13 @@ async def create_bid(
         "title": w.title,
         "bid_price": float(b.bid_price),
     })
+    await notify(db, str(w.buyer_id), "wanted.bid.created", {
+        "title": f"New bid on your wanted post",
+        "body": f"{w.title} — ₹{float(b.bid_price):.0f}",
+        "href": f"/wanted/{w.id}",
+        "wanted_post_id": str(w.id),
+    })
+    await db.commit()
     return _bid_out(b)
 
 
