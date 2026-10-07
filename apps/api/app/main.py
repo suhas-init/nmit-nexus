@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+
+from app.api.routes import auth
 from app.db.session import engine
 
 app = FastAPI(title="NMIT Nexus API", version="0.1.0")
@@ -13,6 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+
+
 @app.get("/health")
 async def health():
     db_ok = "down"
@@ -23,6 +28,7 @@ async def health():
     except Exception as e:
         db_ok = f"error: {e.__class__.__name__}"
     return {"api": "ok", "database": db_ok}
+
 
 @app.get("/")
 async def root():
