@@ -3,5 +3,6 @@ from app.models.category import Category
 from app.models.listing import Listing
 from app.models.listing_image import ListingImage
 from app.models.conversation import Conversation, Message, Offer
+from app.models.handover import Handover
 
-__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer"]
+__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover"]
