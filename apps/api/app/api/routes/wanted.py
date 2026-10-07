@@ -9,6 +9,7 @@ from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.models.wanted import WantedPost, WantedBid
+from app.ws.manager import manager
 
 router = APIRouter(prefix="/wanted", tags=["wanted"])
 
@@ -132,6 +133,12 @@ async def create_bid(
     db.add(b)
     await db.commit()
     await db.refresh(b)
+    await manager.send_to_user(str(w.buyer_id), {
+        "type": "wanted.bid.created",
+        "wanted_post_id": str(w.id),
+        "title": w.title,
+        "bid_price": float(b.bid_price),
+    })
     return _bid_out(b)
 
 

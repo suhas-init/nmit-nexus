@@ -3,12 +3,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/store/auth";
-import { Home, Package, PlusCircle, Inbox, MessageSquare, Megaphone, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { Home, Package, PlusCircle, Inbox, MessageSquare, Megaphone, Sparkles, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/marketplace", label: "Marketplace", icon: Package },
+  { href: "/ai", label: "AI Search", icon: Sparkles },
   { href: "/wanted", label: "Wanted", icon: Megaphone },
   { href: "/sell", label: "Sell", icon: PlusCircle },
   { href: "/offers", label: "Offers", icon: Inbox },

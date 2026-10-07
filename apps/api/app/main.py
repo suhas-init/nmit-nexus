@@ -2,8 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, listings, categories, external, offers, offers_mine, handovers, wanted
+from app.api.routes import auth, listings, categories, external, offers, offers_mine, handovers, wanted, ai
 from app.db.session import engine
+from app.ws.routes import router as ws_router
 
 app = FastAPI(title="NMIT Nexus API", version="0.1.0")
 
@@ -28,6 +29,8 @@ app.include_router(offers.router)
 app.include_router(offers_mine.router)
 app.include_router(handovers.router)
 app.include_router(wanted.router)
+app.include_router(ai.router)
+app.include_router(ws_router)
 
 
 @app.get("/health")
@@ -39,7 +42,7 @@ async def health():
             db_ok = "ok"
     except Exception as e:
         db_ok = f"error: {e.__class__.__name__}"
-    return {"api": "ok", "database": db_ok}
+    return {"api": "ok", "database": db_ok, "ws": "ok"}
 
 
 @app.get("/")

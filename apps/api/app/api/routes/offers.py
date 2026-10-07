@@ -9,6 +9,7 @@ from app.models.listing import Listing
 from app.models.user import User
 from app.models.conversation import Conversation, Message, Offer
 from app.schemas.offer import ConversationOut, MessageCreate, MessageOut, OfferCreate, OfferOut
+from app.ws.manager import manager
 
 router = APIRouter(tags=["offers"])
 
@@ -75,6 +76,14 @@ async def create_offer(
     db.add(msg)
     await db.commit()
     await db.refresh(offer)
+    await manager.send_to_user(str(listing.seller_id), {
+        "type": "offer.created",
+        "offer_id": str(offer.id),
+        "listing_id": str(listing.id),
+        "listing_title": listing.title,
+        "offer_price": float(offer.offer_price),
+        "buyer_id": str(user.id),
+    })
     return _offer_out(offer)
 
 
@@ -122,6 +131,11 @@ async def update_offer(
             listing.status = "RESERVED"
     await db.commit()
     await db.refresh(offer)
+    await manager.send_to_user(str(offer.buyer_id), {
+        "type": "offer.updated",
+        "offer_id": str(offer.id),
+        "status": offer.status,
+    })
     return _offer_out(offer)
 
 
@@ -175,4 +189,9 @@ async def send_message(
     conv.last_message_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(msg)
+    recipient = conv.seller_id if user.id == conv.buyer_id else conv.buyer_id
+    await manager.send_to_user(str(recipient), {
+        "type": "message.created",
+        "conversation_id": str(conversation_id),
+    })
     return _msg_out(msg)

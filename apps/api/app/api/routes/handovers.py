@@ -13,6 +13,7 @@ from app.models.user import User
 from app.models.listing import Listing
 from app.models.conversation import Offer
 from app.models.handover import Handover
+from app.ws.manager import manager
 
 router = APIRouter(prefix="/handovers", tags=["handovers"])
 
@@ -161,4 +162,8 @@ async def confirm_handover(
     await db.refresh(h)
     lres = await db.execute(select(Listing).where(Listing.id == offer.listing_id))
     listing = lres.scalar_one_or_none()
+    if h.verified_at is not None:
+        payload = {"type": "handover.verified", "offer_id": str(offer.id)}
+        await manager.send_to_user(str(offer.seller_id), payload)
+        await manager.send_to_user(str(offer.buyer_id), payload)
     return _serialize(h, user, offer, listing)
