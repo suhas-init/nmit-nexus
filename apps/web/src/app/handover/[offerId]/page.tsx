@@ -7,6 +7,7 @@ import { useAuth } from "@/store/auth";
 import { handoversApi, Handover } from "@/lib/handovers";
 import { CheckCircle2, ShieldCheck, KeyRound, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { Star } from "lucide-react";
 
 export default function HandoverPage() {
   const { offerId } = useParams<{ offerId: string }>();
@@ -73,6 +74,7 @@ export default function HandoverPage() {
               <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.35rem", fontFamily: "inherit" }}>Receipt hash</div>
               {data.receipt_hash}
             </div>
+            <RateDeal offerId={offerId} accessToken={accessToken!} />
           </div>
         ) : (
           <>
@@ -117,6 +119,63 @@ export default function HandoverPage() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+
+function RateDeal({ offerId, accessToken }: { offerId: string; accessToken: string }) {
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/handovers/${offerId}/my-rating`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.rated) setDone(true); })
+      .catch(() => {});
+  }, [offerId, accessToken]);
+
+  const submit = async () => {
+    if (rating < 1) return;
+    setBusy(true);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/handovers/${offerId}/rate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ rating, comment: comment || null }),
+      });
+      setDone(true);
+    } finally { setBusy(false); }
+  };
+
+  if (done) {
+    return (
+      <div style={{ marginTop: "1.25rem", padding: "0.85rem", background: "#e7f5ec", borderRadius: 8, color: "#1e7a3f", fontSize: "0.85rem", fontWeight: 600 }}>
+        ✓ You've rated this deal
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: "1.5rem", textAlign: "left", borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
+      <div style={{ fontWeight: 700, color: "var(--navy)", marginBottom: "0.5rem", fontSize: "0.9rem" }}>Rate this deal</div>
+      <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem" }}>
+        {[1,2,3,4,5].map((n) => (
+          <button key={n} type="button" onClick={() => setRating(n)} onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)}
+            style={{ background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+            <Star size={26} fill={(hover || rating) >= n ? "var(--gold)" : "none"} color={(hover || rating) >= n ? "var(--gold)" : "#cbd5e1"} />
+          </button>
+        ))}
+      </div>
+      <textarea className="textarea" rows={2} placeholder="Optional: how was the interaction?" value={comment} onChange={(e) => setComment(e.target.value)} style={{ marginBottom: "0.5rem" }} />
+      <button className="btn btn-primary" onClick={submit} disabled={busy || rating < 1} style={{ padding: "0.4rem 0.9rem", fontSize: "0.85rem" }}>
+        {busy ? "Submitting…" : "Submit rating"}
+      </button>
     </div>
   );
 }
