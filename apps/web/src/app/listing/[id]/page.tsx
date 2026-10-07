@@ -7,6 +7,7 @@ import { useAuth } from "@/store/auth";
 import { formatINR, timeAgo } from "@/lib/utils";
 import { ArrowLeft, MapPin, ShieldCheck, Trash2, CheckCircle2 } from "lucide-react";
 import { OfferModal } from "@/components/offer-modal";
+import { PricePulse } from "@/components/price-pulse";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -96,6 +97,10 @@ export default function ListingDetailPage() {
                 </button>
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <PricePulse listingId={listing.id} />
           </div>
 
           <div className="card" style={{ padding: "1.25rem" }}>
