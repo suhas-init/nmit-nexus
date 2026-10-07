@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/store/auth";
-import { Home, Package, PlusCircle, Inbox, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { Home, Package, PlusCircle, Inbox, MessageSquare, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -11,6 +11,7 @@ const links = [
   { href: "/marketplace", label: "Marketplace", icon: Package },
   { href: "/sell", label: "Sell", icon: PlusCircle },
   { href: "/offers", label: "Offers", icon: Inbox },
+  { href: "/conversations", label: "Messages", icon: MessageSquare },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ];
 
@@ -28,7 +29,7 @@ export function Navbar() {
           NMIT Nexus
         </Link>
 
-        <nav style={{ display: "flex", gap: "0.25rem", flex: 1 }}>
+        <nav style={{ display: "flex", gap: "0.25rem", flex: 1, flexWrap: "wrap" }}>
           {links.map((l) => {
             const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
             const Icon = l.icon;
