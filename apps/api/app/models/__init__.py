@@ -4,5 +4,6 @@ from app.models.listing import Listing
 from app.models.listing_image import ListingImage
 from app.models.conversation import Conversation, Message, Offer
 from app.models.handover import Handover
+from app.models.wanted import WantedPost, WantedBid
 
-__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover"]
+__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover", "WantedPost", "WantedBid"]

@@ -9,7 +9,7 @@ from alembic import context
 
 from app.core.config import settings
 from app.db.base import Base
-from app.models import user, category, listing, listing_image, conversation, handover  # noqa
+from app.models import user, category, listing, listing_image, conversation, handover, wanted  # noqa
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
