@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, listings
+from app.api.routes import auth, listings, categories
 from app.db.session import engine
 
 app = FastAPI(title="NMIT Nexus API", version="0.1.0")
@@ -17,6 +17,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(listings.router)
+app.include_router(categories.router)
 
 
 @app.get("/health")
