@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, ApiError, Category } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { BookSearch, BookHit } from "@/components/book-search";
+import { AiDraft } from "@/components/ai-draft";
 import Link from "next/link";
 
 const schema = z.object({
@@ -93,6 +94,18 @@ export default function SellPage() {
       <p style={{ fontSize: "0.9rem", marginBottom: "1.5rem" }}>Describe it clearly. Honest listings sell faster.</p>
 
       {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
+
+      <AiDraft
+        categories={categories}
+        onAccept={(draft, categoryId) => {
+          setValue("title", draft.title, { shouldValidate: true });
+          setValue("description", draft.description, { shouldValidate: true });
+          const mid = Math.round((draft.suggested_price_min + draft.suggested_price_max) / 2);
+          setValue("price", mid, { shouldValidate: true });
+          setValue("condition", draft.condition as any, { shouldValidate: true });
+          if (categoryId) setValue("category_id", categoryId, { shouldValidate: true });
+        }}
+      />
 
       <div style={{ marginBottom: "1rem" }}>
         <BookSearch onPick={onBookPick} />

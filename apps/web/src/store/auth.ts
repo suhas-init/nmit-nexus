@@ -1,7 +1,7 @@
 "use client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { api, User } from "@/lib/api";
+import { api, User, setTokenRefreshHandler } from "@/lib/api";
 
 type AuthState = {
   accessToken: string | null;
@@ -36,3 +36,8 @@ export const useAuth = create<AuthState>()(
     { name: "nexus-auth" }
   )
 );
+
+// Wire refresh handler once — updates both tokens when api client silently refreshes
+setTokenRefreshHandler(({ access, refresh }) => {
+  useAuth.setState({ accessToken: access, refreshToken: refresh });
+});
