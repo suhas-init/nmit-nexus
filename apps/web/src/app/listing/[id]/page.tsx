@@ -6,6 +6,7 @@ import { api, Listing } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { formatINR, timeAgo } from "@/lib/utils";
 import { ArrowLeft, MapPin, ShieldCheck, Trash2, CheckCircle2 } from "lucide-react";
+import { OfferModal } from "@/components/offer-modal";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -13,6 +14,7 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [showOffer, setShowOffer] = useState(false);
 
   const { data: listing, isLoading, error, refetch } = useQuery<Listing>({
     queryKey: ["listing", id],
@@ -75,9 +77,11 @@ export default function ListingDetailPage() {
 
             {user && !isOwner && listing.status !== "SOLD" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <button className="btn btn-primary" disabled>Chat (soon)</button>
-                <button className="btn btn-gold" disabled>Make offer (soon)</button>
+                <button className="btn btn-gold" onClick={() => setShowOffer(true)}>Make an offer</button>
               </div>
+            )}
+            {showOffer && listing && (
+              <OfferModal listingId={listing.id} price={listing.price} onClose={() => setShowOffer(false)} />
             )}
 
             {isOwner && (

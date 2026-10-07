@@ -3,13 +3,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/store/auth";
-import { Home, Package, PlusCircle, MessageSquare, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
+import { Home, Package, PlusCircle, Inbox, LayoutDashboard, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/marketplace", label: "Marketplace", icon: Package },
   { href: "/sell", label: "Sell", icon: PlusCircle },
+  { href: "/offers", label: "Offers", icon: Inbox },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ];
 
