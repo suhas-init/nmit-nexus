@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiError, Category } from "@/lib/api";
 import { useAuth } from "@/store/auth";
+import { BookSearch, BookHit } from "@/components/book-search";
 import Link from "next/link";
 
 const schema = z.object({
@@ -20,17 +21,12 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const CONDITIONS = [
-  { v: "NEW", l: "New" },
-  { v: "LIKE_NEW", l: "Like new" },
-  { v: "GOOD", l: "Good" },
-  { v: "FAIR", l: "Fair" },
-  { v: "POOR", l: "Poor" },
+  { v: "NEW", l: "New" }, { v: "LIKE_NEW", l: "Like new" },
+  { v: "GOOD", l: "Good" }, { v: "FAIR", l: "Fair" }, { v: "POOR", l: "Poor" },
 ];
 const TYPES = [
-  { v: "SELL", l: "Sell" },
-  { v: "RENT", l: "Rent" },
-  { v: "BORROW", l: "Borrow" },
-  { v: "FREE", l: "Free" },
+  { v: "SELL", l: "Sell" }, { v: "RENT", l: "Rent" },
+  { v: "BORROW", l: "Borrow" }, { v: "FREE", l: "Free" },
 ];
 
 export default function SellPage() {
@@ -43,10 +39,28 @@ export default function SellPage() {
     queryFn: () => api.get<Category[]>("/categories"),
   });
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { condition: "GOOD", type: "SELL", price: 0 },
   });
+
+  const onBookPick = (b: BookHit) => {
+    setValue("title", b.title, { shouldValidate: true });
+    const lines = [
+      b.authors.length ? `Author: ${b.authors.join(", ")}` : null,
+      b.publisher ? `Publisher: ${b.publisher}` : null,
+      b.publishedDate ? `Year: ${b.publishedDate}` : null,
+      b.isbn ? `ISBN: ${b.isbn}` : null,
+      b.pageCount ? `Pages: ${b.pageCount}` : null,
+      "",
+      "Condition: (edit me)",
+      "Reason for selling: (edit me)",
+    ].filter(Boolean);
+    setValue("description", lines.join("\n"), { shouldValidate: true });
+
+    const academics = categories?.find((c) => c.slug === "academics" || c.slug === "books");
+    if (academics) setValue("category_id", academics.id);
+  };
 
   const onSubmit = async (data: FormData) => {
     if (!accessToken) { router.push("/login?next=/sell"); return; }
@@ -80,6 +94,10 @@ export default function SellPage() {
 
       {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
 
+      <div style={{ marginBottom: "1rem" }}>
+        <BookSearch onPick={onBookPick} />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div>
           <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Title</label>
@@ -89,7 +107,7 @@ export default function SellPage() {
 
         <div>
           <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--navy)", display: "block", marginBottom: "0.35rem" }}>Description</label>
-          <textarea className="textarea" rows={4} placeholder="Condition, accessories, reason for selling..." {...register("description")} />
+          <textarea className="textarea" rows={5} placeholder="Condition, accessories, reason for selling..." {...register("description")} />
           {errors.description && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.description.message}</p>}
         </div>
 
