@@ -9,7 +9,12 @@ app = FastAPI(title="NMIT Nexus API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://nmit-nexus.vercel.app",
+        "https://nmit-nexus-j7ihnymbv-packet-pirates.vercel.app",
+    ],
+    allow_origin_regex=r"https://nmit-nexus.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
