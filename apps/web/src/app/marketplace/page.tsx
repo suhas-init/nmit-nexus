@@ -91,7 +91,7 @@ function MarketplaceInner() {
           {!isLoading && !error && listings && listings.length > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "1rem" }}>
               {listings.map((l, i) => (
-                <Link key={l.id} href={`/listing/${l.id}`} className="card lift fade-in-up" style={{ display: "block", animationDelay: `${Math.min(i * 0.03, 0.3)}s` }}>
+                <Link key={l.id} href={`/listing/${l.id}`} className="card hover-card fade-in-up" style={{ display: "block", animationDelay: `${Math.min(i * 0.03, 0.3)}s` }}>
                   <ListingCardCover listingId={l.id} title={l.title} />
                   <div style={{ padding: "0.9rem" }}>
                     <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
@@ -99,7 +99,7 @@ function MarketplaceInner() {
                       {l.status === "SOLD" && <span className="badge badge-sold">SOLD</span>}
                       {l.status === "RESERVED" && <span className="badge badge-verified">RESERVED</span>}
                     </div>
-                    <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
+                    <div className="hover-card-title" style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                       <span style={{ fontWeight: 800, color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: "1.05rem" }}>{formatINR(l.price)}</span>
                       <span className="mono" style={{ fontSize: "0.7rem", color: "var(--text-2)" }}>{timeAgo(l.created_at)}</span>

@@ -66,9 +66,9 @@ export default function PublicProfilePage() {
           <h2 style={{ fontSize: "1.15rem", fontWeight: 700, color: "var(--text-0)", fontFamily: "var(--font-mono)", marginBottom: "1rem", letterSpacing: "-0.01em" }}>Active listings</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "0.75rem", marginBottom: "2rem" }}>
             {data.active_listings.map((l) => (
-              <Link key={l.id} href={`/listing/${l.id}`} className="card lift" style={{ display: "block", padding: "0.9rem" }}>
+              <Link key={l.id} href={`/listing/${l.id}`} className="card hover-card" style={{ display: "block", padding: "0.9rem" }}>
                 <div className="mono" style={{ fontSize: "0.68rem", color: "var(--text-2)", marginBottom: "0.35rem" }}>{l.condition.replace("_", " ")}</div>
-                <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.92rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
+                <div className="hover-card-title" style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.92rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
                 <div style={{ fontWeight: 800, color: "var(--accent)", fontFamily: "var(--font-mono)" }}>{formatINR(l.price)}</div>
               </Link>
             ))}

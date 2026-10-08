@@ -1291,3 +1291,114 @@ html[data-theme="light"] .feature-block::after {
 }
 html[data-theme="light"] .feature-block:hover { background: var(--bg-2); }
 html[data-theme="light"] .feature-block::before { background: var(--accent); }
+
+/* ============================================================ */
+/* WANTED + LISTING CARD HOVER                                  */
+/* ============================================================ */
+.hover-card {
+  position: relative;
+  transition:
+    background 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
+    border-color 0.3s ease;
+  overflow: hidden;
+}
+
+/* Accent bar slides in from left */
+.hover-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  z-index: 2;
+}
+
+/* Cursor-tracked glow */
+.hover-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(242, 183, 5, 0.08),
+    transparent 55%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.hover-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-2);
+  background: var(--bg-2);
+}
+
+.hover-card:hover::before {
+  transform: scaleY(1);
+}
+
+.hover-card:hover::after {
+  opacity: 1;
+}
+
+/* Title tint on hover */
+.hover-card .hover-card-title {
+  transition: color 0.25s ease;
+}
+.hover-card:hover .hover-card-title {
+  color: var(--accent);
+}
+
+/* Arrow that fades in on the right on hover */
+.hover-card .hover-arrow {
+  position: absolute;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+  color: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.hover-card:hover .hover-arrow {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Small badge/number that pulses on hover */
+.hover-card .hover-pulse {
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.hover-card:hover .hover-pulse {
+  transform: scale(1.06);
+}
+
+/* Kill on touch */
+@media (hover: none) {
+  .hover-card::before,
+  .hover-card::after { display: none !important; }
+  .hover-card:hover { transform: none !important; background: var(--bg-1) !important; }
+  .hover-card:hover .hover-card-title { color: inherit !important; }
+  .hover-card:hover .hover-arrow { display: none; }
+}
+
+/* Light theme tint */
+html[data-theme="light"] .hover-card::after {
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(180, 83, 9, 0.10),
+    transparent 55%
+  );
+}
+html[data-theme="light"] .hover-card:hover {
+  background: var(--bg-2);
+  border-color: var(--border-1);
+}

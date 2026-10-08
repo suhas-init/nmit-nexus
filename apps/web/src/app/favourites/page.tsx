@@ -39,12 +39,12 @@ export default function FavouritesPage() {
       {!isLoading && data && data.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "1rem" }}>
           {data.map((l) => (
-            <Link key={l.id} href={`/listing/${l.id}`} className="card lift" style={{ display: "block" }}>
+            <Link key={l.id} href={`/listing/${l.id}`} className="card hover-card" style={{ display: "block" }}>
               <div className="thumb" style={{ height: 140, fontSize: "1.6rem" }}>
                 {l.title.slice(0, 2).toUpperCase()}
               </div>
               <div style={{ padding: "0.9rem" }}>
-                <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
+                <div className="hover-card-title" style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem", marginBottom: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.title}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                   <span style={{ fontWeight: 800, color: "var(--accent)", fontFamily: "var(--font-mono)" }}>{formatINR(l.price)}</span>
                   <span className="mono" style={{ fontSize: "0.7rem", color: "var(--text-2)" }}>{timeAgo(l.created_at)}</span>

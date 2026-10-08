@@ -4,7 +4,7 @@ import { useEffect } from "react";
 export function FeatureHoverTracker() {
   useEffect(() => {
     const handle = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement)?.closest(".feature-block") as HTMLElement | null;
+      const target = (e.target as HTMLElement)?.closest(".feature-block, .hover-card") as HTMLElement | null;
       if (!target) return;
       const rect = target.getBoundingClientRect();
       target.style.setProperty("--mx", `${e.clientX - rect.left}px`);
