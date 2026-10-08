@@ -28,7 +28,14 @@ let ringtone: { stop: () => void } | null = null;
 let ringTimeout: any = null;
 let pendingOffer: any = null;
 let pendingCandidates: any[] = [];
-let remoteStream = new MediaStream();
+let remoteStream: MediaStream | null = null;
+
+function getRemoteStream(): MediaStream {
+  if (!remoteStream && typeof window !== "undefined") {
+    remoteStream = new MediaStream();
+  }
+  return remoteStream as MediaStream;
+}
 
 type Store = { state: CallState; setState: (s: CallState) => void };
 export const useCallStore = create<Store>((set) => ({
@@ -62,8 +69,9 @@ function ensureAudioEl(): HTMLAudioElement | null {
 function attachRemoteStream() {
   const el = ensureAudioEl();
   if (!el) return;
-  if (remoteStream.getAudioTracks().length === 0) return;
-  el.srcObject = remoteStream;
+  const rs = getRemoteStream();
+  if (rs.getAudioTracks().length === 0) return;
+  el.srcObject = rs;
   el.muted = false;
   el.volume = 1;
   const tryPlay = async (attempts = 8) => {
@@ -124,7 +132,7 @@ function cleanup() {
     localStream = null;
   }
   if (remoteAudioEl) remoteAudioEl.srcObject = null;
-  remoteStream = new MediaStream();
+  remoteStream = null;
   pendingOffer = null;
   pendingCandidates = [];
 }
@@ -138,13 +146,13 @@ function basePC() {
 
   conn.ontrack = (e) => {
     console.log("[webrtc] ontrack:", e.track.kind, "streams:", e.streams?.length);
+    const rs = getRemoteStream();
     if (e.streams && e.streams[0]) {
-      // Copy tracks into our own remote stream (robust across browsers)
       e.streams[0].getTracks().forEach((t) => {
-        if (!remoteStream.getTracks().find((x) => x.id === t.id)) remoteStream.addTrack(t);
+        if (!rs.getTracks().find((x) => x.id === t.id)) rs.addTrack(t);
       });
     } else {
-      remoteStream.addTrack(e.track);
+      rs.addTrack(e.track);
     }
     attachRemoteStream();
   };
