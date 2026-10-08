@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, Category } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { BookSearch, BookHit } from "@/components/book-search";
@@ -35,6 +35,7 @@ export default function SellPage() {
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [err, setErr] = useState<string | null>(null);
+  const qc = useQueryClient();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const { data: categories } = useQuery<Category[]>({
@@ -76,6 +77,7 @@ export default function SellPage() {
           await api.post(`/listings/${created.id}/images`, { urls: imageUrls }, accessToken);
         } catch {}
       }
+      qc.invalidateQueries({ queryKey: ["listings"] });
       router.push(`/listing/${created.id}`);
     } catch (e) {
       const err = e as ApiError;
