@@ -9,6 +9,11 @@ const ICE_SERVERS = [
   { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
 ];
 
+const AUDIO_CONSTRAINTS: MediaStreamConstraints = {
+  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  video: false,
+};
+
 export type CallState =
   | { status: "idle" }
   | { status: "calling"; peerId: string; peerName: string }
@@ -23,6 +28,7 @@ let ringtone: { stop: () => void } | null = null;
 let ringTimeout: any = null;
 let pendingOffer: any = null;
 let pendingCandidates: any[] = [];
+let remoteStream = new MediaStream();
 
 type Store = { state: CallState; setState: (s: CallState) => void };
 export const useCallStore = create<Store>((set) => ({
@@ -47,21 +53,32 @@ function ensureAudioEl(): HTMLAudioElement | null {
     remoteAudioEl.style.height = "1px";
     remoteAudioEl.style.opacity = "0";
     remoteAudioEl.style.pointerEvents = "none";
+    remoteAudioEl.style.left = "-9999px";
     document.body.appendChild(remoteAudioEl);
   }
   return remoteAudioEl;
 }
 
-async function tryPlay(el: HTMLAudioElement, attempts = 6) {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      await el.play();
-      return true;
-    } catch (err) {
-      await new Promise((r) => setTimeout(r, 200 + i * 150));
+function attachRemoteStream() {
+  const el = ensureAudioEl();
+  if (!el) return;
+  if (remoteStream.getAudioTracks().length === 0) return;
+  el.srcObject = remoteStream;
+  el.muted = false;
+  el.volume = 1;
+  const tryPlay = async (attempts = 8) => {
+    for (let i = 0; i < attempts; i++) {
+      try {
+        await el.play();
+        console.log("[webrtc] remote audio playing");
+        return;
+      } catch {
+        await new Promise((r) => setTimeout(r, 250 + i * 200));
+      }
     }
-  }
-  return false;
+    console.warn("[webrtc] remote audio play failed after retries");
+  };
+  tryPlay();
 }
 
 function playRingtone(kind: "incoming" | "outgoing") {
@@ -107,95 +124,119 @@ function cleanup() {
     localStream = null;
   }
   if (remoteAudioEl) remoteAudioEl.srcObject = null;
+  remoteStream = new MediaStream();
   pendingOffer = null;
   pendingCandidates = [];
 }
 
-async function createPC(peerId: string, ws: WebSocket, isCaller: boolean) {
-  pc = new RTCPeerConnection({
+function basePC() {
+  const conn = new RTCPeerConnection({
     iceServers: ICE_SERVERS,
     iceCandidatePoolSize: 10,
     bundlePolicy: "max-bundle",
   });
 
-  console.log("[webrtc] createPC start, isCaller:", isCaller);
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    video: false,
-  });
-  localStream = stream;
-  stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
-
-  pc.onicecandidate = (e) => {
-    if (e.candidate && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: "call.ice", to: peerId, candidate: e.candidate }));
-    }
-  };
-
-  pc.oniceconnectionstatechange = () => {
-    console.log("[webrtc] ice:", pc?.iceConnectionState);
-  };
-
-  pc.ontrack = (e) => {
-    console.log("[webrtc] ontrack:", e.track.kind, "streams:", e.streams.length);
-    const el = ensureAudioEl();
-    if (!el) return;
+  conn.ontrack = (e) => {
+    console.log("[webrtc] ontrack:", e.track.kind, "streams:", e.streams?.length);
     if (e.streams && e.streams[0]) {
-      el.srcObject = e.streams[0];
+      // Copy tracks into our own remote stream (robust across browsers)
+      e.streams[0].getTracks().forEach((t) => {
+        if (!remoteStream.getTracks().find((x) => x.id === t.id)) remoteStream.addTrack(t);
+      });
     } else {
-      const s = new MediaStream([e.track]);
-      el.srcObject = s;
+      remoteStream.addTrack(e.track);
     }
-    el.muted = false;
-    el.volume = 1;
-    tryPlay(el).then((ok) => { if (!ok) console.warn("[webrtc] audio play blocked"); });
+    attachRemoteStream();
   };
 
-  pc.onconnectionstatechange = () => {
-    console.log("[webrtc] conn:", pc?.connectionState);
-    if (!pc) return;
-    if (pc.connectionState === "failed") {
+  conn.onconnectionstatechange = () => {
+    console.log("[webrtc] conn:", conn.connectionState);
+    if (conn.connectionState === "failed") {
       cleanup();
       setState({ status: "ended", reason: "Connection failed" });
       setTimeout(() => setState({ status: "idle" }), 2500);
     }
-    if (pc.connectionState === "disconnected") {
+    if (conn.connectionState === "disconnected") {
       setTimeout(() => {
-        if (pc && pc.connectionState === "disconnected") {
+        if (conn.connectionState === "disconnected") {
           cleanup();
           setState({ status: "ended", reason: "Connection lost" });
           setTimeout(() => setState({ status: "idle" }), 2000);
         }
       }, 5000);
     }
+    if (conn.connectionState === "connected") {
+      attachRemoteStream();
+    }
   };
+
+  conn.oniceconnectionstatechange = () => {
+    console.log("[webrtc] ice:", conn.iceConnectionState);
+  };
+
+  return conn;
+}
+
+// CALLER: add transceiver first, then track
+async function createCallerPC(peerId: string, ws: WebSocket) {
+  pc = basePC();
+  pc.onicecandidate = (e) => {
+    if (e.candidate && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "call.ice", to: peerId, candidate: e.candidate }));
+    }
+  };
+
+  pc.addTransceiver("audio", { direction: "sendrecv" });
+
+  const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+  localStream = stream;
+  stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
+
+  return pc;
+}
+
+// CALLEE: set remote description FIRST, then get media and add track (this is the fix)
+async function createCalleePC(peerId: string, ws: WebSocket, offer: any) {
+  pc = basePC();
+  pc.onicecandidate = (e) => {
+    if (e.candidate && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "call.ice", to: peerId, candidate: e.candidate }));
+    }
+  };
+
+  // 1. Remote offer first — establishes the audio m-line for both directions
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  console.log("[webrtc] callee: setRemoteDescription(offer) done");
+  console.log("[webrtc] callee transceivers after remote:", pc.getTransceivers().map((t) => t.direction));
+
+  // 2. Now open the mic and add tracks (they'll reuse the transceiver from the offer)
+  const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
+  localStream = stream;
+  stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
+  console.log("[webrtc] callee: local track added");
 
   return pc;
 }
 
 export const callActions = {
   startCall: async (peerId: string, peerName: string, ws: WebSocket | null, myName: string) => {
+    console.log("[webrtc] startCall entry, ws:", ws?.readyState);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       setState({ status: "ended", reason: "Reconnecting… try again" });
       setTimeout(() => setState({ status: "idle" }), 2000);
       return;
     }
-    // Always force a clean slate
+
     cleanup();
     setState({ status: "idle" });
-    // Force user-gesture audio unlock — helps mobile Safari/Chrome
-    const el = ensureAudioEl();
-    if (el) {
-      // Do NOT await — play() can hang indefinitely when autoplay is blocked
-      el.play().catch(() => {});
-    }
 
-    console.log("[webrtc] startCall entry — proceeding");
+    const el = ensureAudioEl();
+    if (el) el.play().catch(() => {});
+
     try {
       console.log("[webrtc] startCall — setting calling state");
       setState({ status: "calling", peerId, peerName });
       playRingtone("outgoing");
-      console.log("[webrtc] ringtone started");
 
       clearRingTimeout();
       ringTimeout = setTimeout(() => {
@@ -207,11 +248,10 @@ export const callActions = {
         }
       }, 30000);
 
-      const conn = await createPC(peerId, ws, true);
-      console.log("[webrtc] pc created, creating offer");
+      const conn = await createCallerPC(peerId, ws);
+      console.log("[webrtc] caller pc created, creating offer");
       const offer = await conn.createOffer();
       await conn.setLocalDescription(offer);
-      console.log("[webrtc] offer set, sending");
       ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: offer, peerName: myName }));
       console.log("[webrtc] offer sent");
     } catch (e) {
@@ -227,26 +267,28 @@ export const callActions = {
     if (cur.status !== "incoming" || !ws || !pendingOffer) return;
     const offer = pendingOffer;
 
-    // unlock audio element via the Accept click gesture
     const el = ensureAudioEl();
-    if (el) {
-      el.play().catch(() => {});
-    }
+    if (el) el.play().catch(() => {});
 
     try {
       stopRingtone();
       clearRingTimeout();
-      const conn = await createPC(cur.peerId, ws, false);
-      console.log("[webrtc] answer side: pc created");
-      await conn.setRemoteDescription(new RTCSessionDescription(offer));
-      console.log("[webrtc] remote offer set");
+      console.log("[webrtc] acceptCall — creating callee pc");
+
+      const conn = await createCalleePC(cur.peerId, ws, offer);
       const answer = await conn.createAnswer();
       await conn.setLocalDescription(answer);
+      console.log("[webrtc] callee answer created, sending");
       ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: answer }));
-      for (const c of pendingCandidates) { try { await conn.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
+
+      for (const c of pendingCandidates) {
+        try { await conn.addIceCandidate(new RTCIceCandidate(c)); } catch {}
+      }
       pendingCandidates = [];
       pendingOffer = null;
+
       setState({ status: "active", peerId: cur.peerId, peerName: cur.peerName, muted: false });
+      console.log("[webrtc] callee active");
     } catch (e) {
       console.error("[webrtc] acceptCall failed", e);
       cleanup();
@@ -283,8 +325,7 @@ export const callActions = {
     const cur = useCallStore.getState().state;
 
     if (msg.type === "call.offer") {
-      console.log("[webrtc] got offer from", msg.from, "current:", cur.status, "pendingOffer:", !!pendingOffer);
-      // Ignore duplicate offer (same peer, already pending)
+      console.log("[webrtc] got offer from", msg.from, "status:", cur.status);
       if (cur.status === "incoming" && cur.peerId === msg.from && pendingOffer) {
         console.log("[webrtc] duplicate offer ignored");
         return;
@@ -313,7 +354,10 @@ export const callActions = {
       clearRingTimeout();
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-        for (const c of pendingCandidates) { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
+        console.log("[webrtc] caller: answer applied");
+        for (const c of pendingCandidates) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
+        }
         pendingCandidates = [];
       } catch (e) {
         console.error("[webrtc] setRemoteDescription(answer) failed", e);
