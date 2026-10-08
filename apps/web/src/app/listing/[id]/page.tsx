@@ -10,6 +10,7 @@ import { OfferModal } from "@/components/offer-modal";
 import { PricePulse } from "@/components/price-pulse";
 import { CopyId } from "@/components/copy-id";
 import { ListingGallery } from "@/components/listing-gallery";
+import { FavouriteButton } from "@/components/favourite-button";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -62,7 +63,10 @@ export default function ListingDetailPage() {
             <span className="badge badge-condition">{listing.type}</span>
             {listing.status === "SOLD" ? <span className="badge badge-sold">Sold</span> : <span className="badge badge-active">Available</span>}
           </div>
-          <h1 style={{ fontSize: "1.7rem", fontWeight: 800, color: "var(--text-0)", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>{listing.title}</h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "0.5rem" }}>
+            <h1 style={{ fontSize: "1.7rem", fontWeight: 800, color: "var(--text-0)", fontFamily: "var(--font-mono)", letterSpacing: "-0.02em", margin: 0 }}>{listing.title}</h1>
+            <FavouriteButton listingId={listing.id} />
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1rem", flexWrap: "wrap" }}>
             <div className="mono" style={{ fontSize: "0.72rem", color: "var(--text-2)" }}>listed {timeAgo(listing.created_at)}</div>
             <CopyId value={listing.id} label="listing" />

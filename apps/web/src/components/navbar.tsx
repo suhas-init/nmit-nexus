@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/store/auth";
-import { Home, Package, PlusCircle, Inbox, MessageSquare, Megaphone, Sparkles, LayoutDashboard, LogOut, User as UserIcon, Menu, X } from "lucide-react";
+import { Home, Package, PlusCircle, Inbox, MessageSquare, Megaphone, Sparkles, Heart, LayoutDashboard, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotifBell } from "./notif-bell";
 import { ThemeToggle } from "./theme-toggle";
@@ -14,6 +14,7 @@ const links = [
   { href: "/ai", label: "AI", icon: Sparkles },
   { href: "/wanted", label: "Wanted", icon: Megaphone },
   { href: "/sell", label: "Sell", icon: PlusCircle },
+  { href: "/favourites", label: "Saved", icon: Heart },
   { href: "/offers", label: "Offers", icon: Inbox },
   { href: "/conversations", label: "Chat", icon: MessageSquare },
   { href: "/dashboard", label: "Dash", icon: LayoutDashboard },
