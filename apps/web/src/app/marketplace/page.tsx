@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { api, Category, Listing } from "@/lib/api";
 import { formatINR, timeAgo } from "@/lib/utils";
 import { Search, PackageOpen } from "lucide-react";
+import { ListingCardCover } from "@/components/listing-card-cover";
 
 function MarketplaceInner() {
   const params = useSearchParams();
@@ -91,9 +92,7 @@ function MarketplaceInner() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "1rem" }}>
               {listings.map((l, i) => (
                 <Link key={l.id} href={`/listing/${l.id}`} className="card lift fade-in-up" style={{ display: "block", animationDelay: `${Math.min(i * 0.03, 0.3)}s` }}>
-                  <div className="thumb" style={{ height: 150, fontSize: "1.6rem" }}>
-                    {l.title.slice(0, 2).toUpperCase()}
-                  </div>
+                  <ListingCardCover listingId={l.id} title={l.title} />
                   <div style={{ padding: "0.9rem" }}>
                     <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
                       <span className="badge badge-condition">{l.condition.replace("_", " ")}</span>

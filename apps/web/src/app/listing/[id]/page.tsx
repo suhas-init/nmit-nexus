@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, ShieldCheck, Trash2, CheckCircle2 } from "lucide-rea
 import { OfferModal } from "@/components/offer-modal";
 import { PricePulse } from "@/components/price-pulse";
 import { CopyId } from "@/components/copy-id";
+import { ListingGallery } from "@/components/listing-gallery";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -55,9 +56,7 @@ export default function ListingDetailPage() {
 
       <div className="detail-split" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "1.5rem", alignItems: "start" }}>
         <div className="card" style={{ padding: "1.5rem" }}>
-          <div className="thumb" style={{ height: 320, borderRadius: 12, marginBottom: "1.25rem", fontSize: "3rem" }}>
-            {listing.title.slice(0, 2).toUpperCase()}
-          </div>
+          <ListingGallery listingId={listing.id} fallback={listing.title} />
           <div style={{ display: "flex", gap: "0.4rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
             <span className="badge badge-condition">{listing.condition.replace("_", " ")}</span>
             <span className="badge badge-condition">{listing.type}</span>

@@ -9,6 +9,7 @@ import { api, ApiError, Category } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { BookSearch, BookHit } from "@/components/book-search";
 import { AiDraft } from "@/components/ai-draft";
+import { ImageUploader } from "@/components/image-uploader";
 import Link from "next/link";
 
 const schema = z.object({
@@ -34,6 +35,7 @@ export default function SellPage() {
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [err, setErr] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["categories"],
@@ -69,6 +71,11 @@ export default function SellPage() {
     try {
       const payload = { ...data, category_id: data.category_id || null };
       const created = await api.post<{ id: string }>("/listings", payload, accessToken);
+      if (imageUrls.length > 0) {
+        try {
+          await api.post(`/listings/${created.id}/images`, { urls: imageUrls }, accessToken);
+        } catch {}
+      }
       router.push(`/listing/${created.id}`);
     } catch (e) {
       const err = e as ApiError;
@@ -109,6 +116,10 @@ export default function SellPage() {
 
       <div style={{ marginBottom: "1rem" }}>
         <BookSearch onPick={onBookPick} />
+      </div>
+
+      <div className="card" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
+        <ImageUploader urls={imageUrls} onChange={setImageUrls} max={5} />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
