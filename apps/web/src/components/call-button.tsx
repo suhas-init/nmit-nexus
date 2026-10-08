@@ -13,46 +13,26 @@ export function CallButton({ peerId, peerName }: { peerId: string; peerName: str
   if (!user || user.id === peerId) return null;
 
   const onClick = async () => {
-    console.log("[call] click", { status, ws: sharedWsRef.current?.readyState });
-
-    // 1. Mic permission pre-check — surface blocked state clearly
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        push({ title: "Voice calls not supported", body: "Your browser doesn't support microphones." });
-        return;
-      }
-      const perm = await navigator.permissions?.query({ name: "microphone" as any }).catch(() => null);
-      console.log("[call] mic permission:", perm?.state);
-      if (perm?.state === "denied") {
-        push({
-          title: "Microphone blocked",
-          body: "Click the lock icon in your browser's address bar → Site settings → allow Microphone → refresh.",
-        });
-        return;
-      }
-    } catch (e) {
-      console.warn("[call] permission query failed (non-blocking):", e);
-    }
-
-    // 2. Ensure WS is open
-    if (!sharedWsRef.current || sharedWsRef.current.readyState !== WebSocket.OPEN) {
-      push({ title: "Connecting…", body: "Retrying in a moment." });
-      setTimeout(() => {
-        if (sharedWsRef.current?.readyState === WebSocket.OPEN) {
-          callActions.startCall(peerId, peerName, sharedWsRef.current, user.name);
-        } else {
-          push({ title: "Connection lost", body: "Please refresh the page." });
-        }
-      }, 800);
+    if (status !== "idle") {
+      callActions.endCall(sharedWsRef.current);
+      setTimeout(() => callActions.startCall(peerId, peerName, sharedWsRef.current, user.name), 300);
       return;
     }
 
-    // 3. Force reset any stuck state
-    if (status !== "idle") {
-      callActions.endCall(sharedWsRef.current);
-      setTimeout(() => {
-        callActions.startCall(peerId, peerName, sharedWsRef.current, user.name);
-      }, 350);
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        push({ title: "Voice not supported", body: "This browser can't access the microphone." });
+        return;
+      }
+      const perm = await navigator.permissions?.query({ name: "microphone" as any }).catch(() => null);
+      if (perm?.state === "denied") {
+        push({ title: "Microphone blocked", body: "Allow mic access in your browser settings and refresh." });
+        return;
+      }
+    } catch {}
+
+    if (!sharedWsRef.current || sharedWsRef.current.readyState !== WebSocket.OPEN) {
+      push({ title: "Reconnecting…", body: "Try again in a moment." });
       return;
     }
 
@@ -61,12 +41,13 @@ export function CallButton({ peerId, peerName }: { peerId: string; peerName: str
 
   return (
     <button
-      className="btn btn-outline"
       onClick={onClick}
-      style={{ padding: "0.5rem 0.85rem", fontSize: "0.75rem", opacity: status !== "idle" ? 0.7 : 1 }}
-      title="Voice call"
+      className="call-btn"
+      style={{ opacity: status !== "idle" ? 0.7 : 1 }}
+      title="Start peer-to-peer voice call"
     >
-      <Phone size={13} /> Call
+      <Phone size={14} />
+      <span>Voice call</span>
     </button>
   );
 }

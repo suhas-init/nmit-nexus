@@ -105,7 +105,12 @@ export default function ConversationPage() {
             </Link>
           </div>
           {myConv.with_user.id && (
-            <CallButton peerId={myConv.with_user.id} peerName={myConv.with_user.name} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
+              <CallButton peerId={myConv.with_user.id} peerName={myConv.with_user.name} />
+              <span className="mono" style={{ fontSize: "0.58rem", color: "var(--text-2)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                P2P · NO NUMBERS
+              </span>
+            </div>
           )}
         </div>
       )}

@@ -2265,3 +2265,67 @@ html[data-theme="light"] header a.btn:hover {
   header .nav-link:hover,
   header a.btn:hover { transform: none !important; }
 }
+
+/* ============================================================ */
+/* CALL BUTTON — prominent, self-explanatory                    */
+/* ============================================================ */
+.call-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  background: linear-gradient(120deg, rgba(74, 222, 128, 0.12), rgba(74, 222, 128, 0.06));
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #4ADE80;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.call-btn:hover {
+  background: linear-gradient(120deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.1));
+  border-color: #4ADE80;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -8px rgba(74, 222, 128, 0.6);
+}
+
+.call-btn:active { transform: translateY(0); }
+
+/* Subtle pulse to draw the eye */
+.call-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(74, 222, 128, 0.15), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  animation: callBtnPulse 2.6s ease-in-out infinite;
+}
+@keyframes callBtnPulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Light theme */
+html[data-theme="light"] .call-btn {
+  background: linear-gradient(120deg, rgba(21, 128, 61, 0.1), rgba(21, 128, 61, 0.04));
+  border-color: rgba(21, 128, 61, 0.35);
+  color: #15803D;
+}
+html[data-theme="light"] .call-btn:hover {
+  background: linear-gradient(120deg, rgba(21, 128, 61, 0.18), rgba(21, 128, 61, 0.08));
+  border-color: #15803D;
+}
+
+/* Mobile — keep it compact */
+@media (max-width: 480px) {
+  .call-btn { padding: 0.45rem 0.7rem; font-size: 0.65rem; }
+  .call-btn span { display: none; }
+}

@@ -107,8 +107,8 @@ export default function Home() {
             </div>
             <div style={{ width: 1, background: "var(--border-1)" }} />
             <div>
-              <div className="mono" style={{ fontSize: "1.4rem", fontWeight: 500, color: "var(--text-0)" }}>@gmail</div>
-              <div style={{ fontSize: "0.72rem", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: "0.15rem" }}>email verified</div>
+              <div className="mono" style={{ fontSize: "1.4rem", fontWeight: 500, color: "var(--text-0)" }}>P2P</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: "0.15rem" }}>voice calls</div>
             </div>
           </div>
         </div>
