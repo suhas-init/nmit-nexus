@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useAuth } from "@/store/auth";
 import { api, Listing } from "@/lib/api";
@@ -8,6 +8,7 @@ import { Package, Eye, CheckCircle2, PackageOpen, Star, TrendingUp } from "lucid
 
 export default function DashboardPage() {
   const { user, accessToken } = useAuth();
+  const qc = useQueryClient();
 
   const { data: listings, isLoading } = useQuery<Listing[]>({
     queryKey: ["my-listings", user?.id],

@@ -43,9 +43,23 @@ export default function WantedDetailPage() {
 
   const respond = async (bidId: string, action: "accept" | "reject") => {
     if (!accessToken) return;
-    await wantedApi.respond(bidId, action, accessToken);
-    qc.invalidateQueries({ queryKey: ["wanted-bids", id] });
-    qc.invalidateQueries({ queryKey: ["wanted", id] });
+    // Optimistic
+    qc.setQueryData(["wanted-bids", id], (old: any) => {
+      if (!Array.isArray(old)) return old;
+      return old.map((b: any) =>
+        b.id === bidId ? { ...b, status: action === "accept" ? "ACCEPTED" : "REJECTED" } : b
+      );
+    });
+    qc.setQueryData(["wanted", id], (old: any) =>
+      action === "accept" && old ? { ...old, status: "FULFILLED" } : old
+    );
+    try {
+      await wantedApi.respond(bidId, action, accessToken);
+    } finally {
+      qc.invalidateQueries({ queryKey: ["wanted-bids", id] });
+      qc.invalidateQueries({ queryKey: ["wanted", id] });
+      qc.invalidateQueries({ queryKey: ["wanted"] });
+    }
   };
 
   if (isLoading) return <div style={{ padding: "3rem", textAlign: "center" }}>Loading…</div>;

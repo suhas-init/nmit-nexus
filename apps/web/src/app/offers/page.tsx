@@ -53,8 +53,19 @@ export default function OffersPage() {
 
   const respond = async (id: string, action: "accept" | "reject") => {
     if (!accessToken) return;
-    await offersApi.respond(id, action, accessToken);
-    qc.invalidateQueries({ queryKey: ["offers-inbox"] });
+    // Optimistic — update status locally first
+    qc.setQueryData(["offers-inbox", listings], (old: any) => {
+      if (!Array.isArray(old)) return old;
+      return old.map((o: any) =>
+        o.id === id ? { ...o, status: action === "accept" ? "ACCEPTED" : "REJECTED" } : o
+      );
+    });
+    try {
+      await offersApi.respond(id, action, accessToken);
+    } finally {
+      qc.invalidateQueries({ queryKey: ["offers-inbox"] });
+      qc.invalidateQueries({ queryKey: ["my-offers"] });
+    }
   };
 
   if (!user) return <div className="card" style={{ padding: "3rem", textAlign: "center" }}>Sign in to view offers.</div>;

@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, Listing } from "@/lib/api";
@@ -19,6 +19,7 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
   const [showOffer, setShowOffer] = useState(false);
 
   const { data: listing, isLoading, error, refetch } = useQuery<Listing>({
@@ -31,9 +32,16 @@ export default function ListingDetailPage() {
   const markSold = async () => {
     if (!accessToken || !listing) return;
     setBusy(true);
+    // Optimistic — flip status immediately
+    qc.setQueryData(["listing", listing.id], (old: any) =>
+      old ? { ...old, status: "SOLD", sold_at: new Date().toISOString() } : old
+    );
+    qc.invalidateQueries({ queryKey: ["listings"] });
     try {
       await api.post(`/listings/${listing.id}/sold`, {}, accessToken);
-      await refetch();
+    } catch {
+      // Rollback
+      qc.setQueryData(["listing", listing.id], listing);
     } finally { setBusy(false); }
   };
 
@@ -41,9 +49,18 @@ export default function ListingDetailPage() {
     if (!accessToken || !listing) return;
     if (!confirm("Delete this listing permanently?")) return;
     setBusy(true);
+    // Optimistic — remove from all caches and navigate instantly
+    qc.removeQueries({ queryKey: ["listing", listing.id] });
+    qc.setQueryData(["listings"], (old: any) =>
+      Array.isArray(old) ? old.filter((l: any) => l.id !== listing.id) : old
+    );
+    qc.invalidateQueries({ queryKey: ["listings"] });
+    qc.invalidateQueries({ queryKey: ["my-listings"] });
+    router.push("/dashboard");
     try {
       await api.del(`/listings/${listing.id}`, accessToken);
-      router.push("/dashboard");
+    } catch (e) {
+      console.error("delete failed", e);
     } finally { setBusy(false); }
   };
 

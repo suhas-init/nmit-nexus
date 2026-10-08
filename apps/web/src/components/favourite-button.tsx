@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { Heart } from "lucide-react";
 
 export function FavouriteButton({ listingId, size = 18 }: { listingId: string; size?: number }) {
   const { user, accessToken } = useAuth();
+  const qc = useQueryClient();
   const [fav, setFav] = useState(false);
   const [loading, setLoading] = useState(false);
   const [init, setInit] = useState(true);
@@ -25,6 +27,7 @@ export function FavouriteButton({ listingId, size = 18 }: { listingId: string; s
     setLoading(true);
     const next = !fav;
     setFav(next);
+    qc.invalidateQueries({ queryKey: ["favourites"] });
     try {
       if (next) await api.post(`/listings/${listingId}/favourite`, {}, accessToken);
       else await api.del(`/listings/${listingId}/favourite`, accessToken);

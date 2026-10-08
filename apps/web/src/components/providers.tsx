@@ -6,7 +6,7 @@ import { ToastHost } from "./toast-host";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient({
-    defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+    defaultOptions: { queries: { staleTime: 10_000, refetchOnWindowFocus: true, refetchOnMount: true } },
   }));
   return (
     <QueryClientProvider client={client}>
