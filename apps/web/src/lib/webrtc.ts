@@ -1,15 +1,11 @@
 "use client";
 import { create } from "zustand";
 
-// ============================================================
-// ICE CONFIG — multiple STUN + TURN (UDP, TCP, TLS)
-// ============================================================
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: [
     "stun:stun.l.google.com:19302",
     "stun:stun1.l.google.com:19302",
     "stun:stun2.l.google.com:19302",
-    "stun:stun3.l.google.com:19302",
     "stun:stun.cloudflare.com:3478",
   ]},
   {
@@ -25,33 +21,25 @@ const ICE_SERVERS: RTCIceServer[] = [
   },
 ];
 
-// ============================================================
-// AUDIO CONSTRAINTS
-// ============================================================
 const AUDIO_CONSTRAINTS: MediaStreamConstraints = {
   audio: {
     echoCancellation: true,
     noiseSuppression: true,
     autoGainControl: true,
     channelCount: 1,
+    sampleRate: 48000,
   },
   video: false,
 };
 
-// ============================================================
-// TIMEOUTS (ms)
-// ============================================================
 const TIMEOUTS = {
-  ICE_GATHER: 4000,
+  ICE_GATHER: 2000,        // reduced — was 4000, caused laggy feel
   RING: 30000,
-  CONNECT: 15000,
+  CONNECT: 20000,
   DISCONNECT_GRACE: 5000,
   RECOVERY_GRACE: 8000,
 };
 
-// ============================================================
-// TYPES
-// ============================================================
 export type CallState =
   | { status: "idle" }
   | { status: "calling"; peerId: string; peerName: string }
@@ -59,9 +47,6 @@ export type CallState =
   | { status: "active"; peerId: string; peerName: string; muted: boolean }
   | { status: "ended"; reason?: string };
 
-// ============================================================
-// SINGLETON STATE
-// ============================================================
 let pc: RTCPeerConnection | null = null;
 let localStream: MediaStream | null = null;
 let remoteAudioEl: HTMLAudioElement | null = null;
@@ -72,10 +57,8 @@ let disconnectGrace: any = null;
 let pendingOffer: any = null;
 let pendingCandidates: any[] = [];
 let remoteStream: MediaStream | null = null;
+let answerApplied = false;   // dedupe guard
 
-// ============================================================
-// ZUSTAND STORE
-// ============================================================
 type Store = { state: CallState; setState: (s: CallState) => void };
 export const useCallStore = create<Store>((set) => ({
   state: { status: "idle" },
@@ -122,11 +105,22 @@ function attachRemoteStream() {
   el.volume = 1;
   (async () => {
     for (let i = 0; i < 8; i++) {
-      try { await el.play(); console.log("[webrtc] remote audio playing"); return; }
-      catch { await new Promise((r) => setTimeout(r, 250 + i * 200)); }
+      try { await el.play(); return; }
+      catch { await new Promise((r) => setTimeout(r, 200 + i * 150)); }
     }
-    console.warn("[webrtc] remote audio play failed after retries");
   })();
+}
+
+// Log the negotiated audio direction so we can see at a glance what happened
+function logAudioDirection(sdp: string | undefined, label: string) {
+  if (!sdp) return;
+  const lines = sdp.split(/\r\n|\n/);
+  const idx = lines.findIndex((l) => l.startsWith("m=audio"));
+  if (idx < 0) return;
+  const dirLine = lines.slice(idx).find((l) =>
+    /^a=(sendrecv|sendonly|recvonly|inactive)/.test(l)
+  );
+  console.log(`[webrtc] ${label} audio direction → ${dirLine || "a=sendrecv (default)"}`);
 }
 
 function playRingtone(kind: "incoming" | "outgoing") {
@@ -179,27 +173,10 @@ function cleanup() {
   remoteStream = null;
   pendingOffer = null;
   pendingCandidates = [];
+  answerApplied = false;
 }
 
-function forceSendRecv(conn: RTCPeerConnection) {
-  try {
-    conn.getTransceivers().forEach((t) => {
-      try {
-        if (t.direction !== "sendrecv") {
-          t.direction = "sendrecv";
-          console.log("[webrtc] forced transceiver to sendrecv");
-        }
-      } catch {}
-    });
-  } catch {}
-}
-
-function patchSdp(sdp: string | undefined): string {
-  if (!sdp) return "";
-  return sdp.replace(/a=(recvonly|sendonly)/g, "a=sendrecv");
-}
-
-function waitForIceGathering(conn: RTCPeerConnection, timeoutMs = TIMEOUTS.ICE_GATHER): Promise<void> {
+async function waitForIceGathering(conn: RTCPeerConnection, timeoutMs = TIMEOUTS.ICE_GATHER): Promise<void> {
   return new Promise((resolve) => {
     if (conn.iceGatheringState === "complete") { resolve(); return; }
     const timer = setTimeout(() => { conn.removeEventListener("icegatheringstatechange", check); resolve(); }, timeoutMs);
@@ -215,12 +192,10 @@ function waitForIceGathering(conn: RTCPeerConnection, timeoutMs = TIMEOUTS.ICE_G
 }
 
 // ============================================================
-// getUserMedia WITH FULL ERROR HANDLING
+// getUserMedia WITH ERROR MAPPING
 // ============================================================
 async function safeGetUserMedia(): Promise<MediaStream> {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error("VOICE_UNSUPPORTED");
-  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("VOICE_UNSUPPORTED");
   try {
     return await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
   } catch (err: any) {
@@ -243,16 +218,16 @@ async function safeGetUserMedia(): Promise<MediaStream> {
 
 const ERROR_MESSAGES: Record<string, string> = {
   VOICE_UNSUPPORTED: "Voice calls aren't supported in this browser.",
-  MIC_BLOCKED: "Microphone blocked. Click the lock icon in the address bar and allow Microphone, then refresh.",
+  MIC_BLOCKED: "Microphone blocked. Click the lock icon in the address bar → allow Microphone → refresh.",
   NO_MIC: "No microphone found on this device.",
   MIC_CONSTRAINT: "Your microphone doesn't support the required settings.",
-  MIC_IN_USE: "Your microphone is being used by another app. Close it and try again.",
+  MIC_IN_USE: "Your microphone is used by another app. Close it and try again.",
   MIC_ABORTED: "Microphone access was interrupted. Try again.",
   MIC_UNKNOWN: "Couldn't access your microphone.",
 };
 
 // ============================================================
-// CREATE PEER CONNECTION WITH ALL HANDLERS
+// PEER CONNECTION
 // ============================================================
 function createPeerConnection(peerId: string, ws: WebSocket): RTCPeerConnection {
   const conn = new RTCPeerConnection({
@@ -285,24 +260,20 @@ function createPeerConnection(peerId: string, ws: WebSocket): RTCPeerConnection 
     console.log("[webrtc] ice:", st);
 
     if (st === "failed") {
-      console.warn("[webrtc] ICE failed — attempting restart");
       try { conn.restartIce(); } catch {}
-      // if restart doesn't help within grace period, end the call
       setTimeout(() => {
         if (conn.iceConnectionState === "failed" || conn.iceConnectionState === "disconnected") {
           cleanup();
-          setState({ status: "ended", reason: "Network unreachable. Try a different network." });
-          setTimeout(() => setState({ status: "idle" }), 3000);
+          setState({ status: "ended", reason: "Network unreachable." });
+          setTimeout(() => setState({ status: "idle" }), 2500);
         }
       }, TIMEOUTS.RECOVERY_GRACE);
     }
 
     if (st === "disconnected") {
-      // Grace period — often recovers on its own
       if (disconnectGrace) clearTimeout(disconnectGrace);
       disconnectGrace = setTimeout(() => {
         if (conn.iceConnectionState === "disconnected") {
-          console.warn("[webrtc] ICE still disconnected after grace — restarting");
           try { conn.restartIce(); } catch {}
           setTimeout(() => {
             if (conn.iceConnectionState === "disconnected" || conn.iceConnectionState === "failed") {
@@ -318,20 +289,20 @@ function createPeerConnection(peerId: string, ws: WebSocket): RTCPeerConnection 
     if (st === "connected" || st === "completed") {
       if (disconnectGrace) { clearTimeout(disconnectGrace); disconnectGrace = null; }
       if (connectTimeout) { clearTimeout(connectTimeout); connectTimeout = null; }
-      forceSendRecv(conn);
       attachRemoteStream();
+      // Late-arriving tracks
+      setTimeout(attachRemoteStream, 500);
+      setTimeout(attachRemoteStream, 1500);
     }
   };
 
   conn.onconnectionstatechange = () => {
-    const st = conn.connectionState;
-    console.log("[webrtc] conn:", st);
-    if (st === "connected") {
+    console.log("[webrtc] conn:", conn.connectionState);
+    if (conn.connectionState === "connected") {
       if (connectTimeout) { clearTimeout(connectTimeout); connectTimeout = null; }
-      forceSendRecv(conn);
       attachRemoteStream();
     }
-    if (st === "failed") {
+    if (conn.connectionState === "failed") {
       cleanup();
       setState({ status: "ended", reason: "Connection failed." });
       setTimeout(() => setState({ status: "idle" }), 2500);
@@ -340,9 +311,7 @@ function createPeerConnection(peerId: string, ws: WebSocket): RTCPeerConnection 
 
   conn.onsignalingstatechange = () => console.log("[webrtc] signaling:", conn.signalingState);
 
-  conn.onicegatheringstatechange = () => console.log("[webrtc] gathering:", conn.iceGatheringState);
-
-  // Connection timeout — if we never reach connected within N seconds
+  // Connection timeout — only arm for CALLER (callee should not auto-fail)
   if (connectTimeout) clearTimeout(connectTimeout);
   connectTimeout = setTimeout(() => {
     if (conn.connectionState !== "connected") {
@@ -360,6 +329,7 @@ function createPeerConnection(peerId: string, ws: WebSocket): RTCPeerConnection 
 // ACTIONS
 // ============================================================
 export const callActions = {
+  // --------- CALLER ---------
   startCall: async (peerId: string, peerName: string, ws: WebSocket | null, myName: string) => {
     console.log("[webrtc] startCall, ws:", ws?.readyState);
 
@@ -379,7 +349,6 @@ export const callActions = {
       setState({ status: "calling", peerId, peerName });
       playRingtone("outgoing");
 
-      // Ring timeout
       if (ringTimeout) clearTimeout(ringTimeout);
       ringTimeout = setTimeout(() => {
         if (getStatus() === "calling") {
@@ -390,19 +359,19 @@ export const callActions = {
         }
       }, TIMEOUTS.RING);
 
-      // Get mic first (caller)
+      // Caller: mic first
       const stream = await safeGetUserMedia();
       localStream = stream;
       console.log("[webrtc] caller got mic, tracks:", stream.getAudioTracks().length);
 
       pc = createPeerConnection(peerId, ws);
-      stream.getAudioTracks().forEach((t) => pc!.addTrack(t, stream));
-      forceSendRecv(pc);
+
+      // Add track — creates sendrecv transceiver
+      stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
 
       const offer = await pc.createOffer();
-      offer.sdp = patchSdp(offer.sdp);
+      logAudioDirection(offer.sdp, "caller offer");
       await pc.setLocalDescription(offer);
-      forceSendRecv(pc);
 
       console.log("[webrtc] caller gathering ICE…");
       await waitForIceGathering(pc);
@@ -418,6 +387,7 @@ export const callActions = {
     }
   },
 
+  // --------- CALLEE ---------
   acceptCall: async (ws: WebSocket | null) => {
     const cur = useCallStore.getState().state;
     if (cur.status !== "incoming" || !ws || !pendingOffer) return;
@@ -433,52 +403,37 @@ export const callActions = {
 
       pc = createPeerConnection(cur.peerId, ws);
 
-      // 1. Remote offer FIRST
+      // ============================================================
+      // CRITICAL FIX: mic + addTrack BEFORE setRemoteDescription.
+      // addTrack creates a sendrecv transceiver. setRemoteDescription
+      // then REUSES that transceiver for the offer's audio m-line.
+      // This guarantees the answer SDP says "a=sendrecv" — no more
+      // one-way audio when the callee is the receiver of the call.
+      // ============================================================
+      const stream = await safeGetUserMedia();
+      localStream = stream;
+      const audioTrack = stream.getAudioTracks()[0];
+      console.log("[webrtc] callee got mic");
+
+      // 1. addTrack first — creates the sendrecv audio transceiver
+      pc.addTrack(audioTrack, stream);
+      console.log("[webrtc] callee: addTrack → transceivers:", pc.getTransceivers().length);
+
+      // 2. NOW set remote — reuses the transceiver
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       console.log("[webrtc] callee: remote set, transceivers:", pc.getTransceivers().length);
-      forceSendRecv(pc);
 
-      // 2. Drain queued ICE
+      // 3. Drain ICE that arrived early
       const drained = pendingCandidates;
       pendingCandidates = [];
       for (const c of drained) {
         try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
       }
 
-      // 3. Get mic — attach to negotiated transceiver
-      const stream = await safeGetUserMedia();
-      localStream = stream;
-      const audioTrack = stream.getAudioTracks()[0];
-      console.log("[webrtc] callee got mic");
-
-      // Find the audio transceiver from the offer and use replaceTrack
-      let attached = false;
-      for (const t of pc.getTransceivers()) {
-        try {
-          const isAudio =
-            t.receiver?.track?.kind === "audio" ||
-            t.sender?.track?.kind === "audio" ||
-            (!t.sender?.track && !t.receiver?.track);
-          if (isAudio) {
-            t.direction = "sendrecv";  // FORCE before replaceTrack
-            await t.sender.replaceTrack(audioTrack);
-            attached = true;
-            console.log("[webrtc] callee attached via replaceTrack");
-            break;
-          }
-        } catch (err) { console.warn("[webrtc] replaceTrack failed", err); }
-      }
-      if (!attached) {
-        console.log("[webrtc] callee fallback to addTrack");
-        pc.addTrack(audioTrack, stream);
-      }
-      forceSendRecv(pc);
-
-      // 4. Answer
+      // 4. Create answer — direction should now be sendrecv for audio
       const answer = await pc.createAnswer();
-      answer.sdp = patchSdp(answer.sdp);
+      logAudioDirection(answer.sdp, "callee answer");
       await pc.setLocalDescription(answer);
-      forceSendRecv(pc);
 
       console.log("[webrtc] callee gathering ICE…");
       await waitForIceGathering(pc);
@@ -529,18 +484,14 @@ export const callActions = {
 
     if (msg.type === "call.offer") {
       console.log("[webrtc] got offer, status:", cur.status);
-
-      // Ignore duplicate offers
       if (cur.status === "incoming" && cur.peerId === msg.from && pendingOffer) {
         console.log("[webrtc] dup offer ignored");
         return;
       }
-      // Busy — auto-decline
       if (cur.status !== "idle") {
         try { ws.send(JSON.stringify({ type: "call.decline", to: msg.from })); } catch {}
         return;
       }
-
       pendingOffer = msg.sdp;
       pendingCandidates = [];
       setState({ status: "incoming", peerId: msg.from, peerName: msg.peerName || "Someone" });
@@ -558,13 +509,20 @@ export const callActions = {
 
     else if (msg.type === "call.answer") {
       if (!pc) return;
+
+      // DEDUPE: ignore duplicate answers (WS may deliver more than once)
+      if (pc.signalingState !== "have-local-offer" || answerApplied) {
+        console.log("[webrtc] duplicate/late answer ignored, state:", pc.signalingState);
+        return;
+      }
+      answerApplied = true;
+
       stopRingtone();
       clearTimers();
       try {
-        // 1. Answer FIRST
+        // 1. Set the answer FIRST (this is critical)
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-        console.log("[webrtc] caller: answer applied");
-        forceSendRecv(pc);
+        logAudioDirection(pc.remoteDescription?.sdp, "caller received answer");
 
         // 2. THEN drain queued ICE
         const drained = pendingCandidates;
