@@ -99,6 +99,9 @@ export default function ListingDetailPage() {
                     <CheckCircle2 size={15} /> {busy ? "..." : "Mark as sold"}
                   </button>
                 )}
+                <Link href={`/listing/${listing.id}/edit`} className="btn btn-outline" style={{ textAlign: "center" }}>
+                  Edit listing
+                </Link>
                 <button className="btn btn-outline" onClick={remove} disabled={busy}>
                   <Trash2 size={15} /> Delete listing
                 </button>
