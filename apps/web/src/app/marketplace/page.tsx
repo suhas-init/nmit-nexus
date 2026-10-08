@@ -14,6 +14,7 @@ function MarketplaceInner() {
   const [q, setQ] = useState(initialQ);
   const [cat, setCat] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("");
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["categories"],
@@ -24,9 +25,10 @@ function MarketplaceInner() {
   if (q) qs.set("q", q);
   if (cat) qs.set("category_id", cat);
   if (maxPrice) qs.set("max_price", maxPrice);
+  if (typeFilter) qs.set("type", typeFilter);
 
   const { data: listings, isLoading, error } = useQuery<Listing[]>({
-    queryKey: ["listings", q, cat, maxPrice],
+    queryKey: ["listings", q, cat, maxPrice, typeFilter],
     queryFn: () => api.get<Listing[]>(`/listings?${qs.toString()}`),
   });
 
@@ -51,6 +53,28 @@ function MarketplaceInner() {
           </div>
 
           <div style={{ marginBottom: "1rem" }}>
+            <div className="term-label" style={{ marginBottom: "0.5rem" }}>LISTING TYPE</div>
+            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+              {[
+                { v: "", l: "All" },
+                { v: "SELL", l: "Sell" },
+                { v: "FREE", l: "Free" },
+                { v: "RENT", l: "Rent" },
+                { v: "BORROW", l: "Borrow" },
+              ].map((t) => (
+                <button
+                  key={t.v}
+                  type="button"
+                  onClick={() => setTypeFilter(t.v)}
+                  className={`filter-chip ${typeFilter === t.v ? "filter-chip--on" : ""}`}
+                >
+                  {t.l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
             <div className="term-label" style={{ marginBottom: "0.5rem" }}>CATEGORY</div>
             <select className="select" value={cat} onChange={(e) => setCat(e.target.value)} style={{ fontSize: "0.82rem" }}>
               <option value="">ALL</option>
@@ -63,8 +87,8 @@ function MarketplaceInner() {
             <input className="input" type="number" min={0} placeholder="ANY" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} style={{ fontSize: "0.82rem" }} />
           </div>
 
-          {(q || cat || maxPrice) && (
-            <button className="btn btn-outline" style={{ width: "100%", marginTop: "1rem", fontSize: "0.7rem" }} onClick={() => { setQ(""); setCat(""); setMaxPrice(""); }}>
+          {(q || cat || maxPrice || typeFilter) && (
+            <button className="btn btn-outline" style={{ width: "100%", marginTop: "1rem", fontSize: "0.7rem" }} onClick={() => { setQ(""); setCat(""); setMaxPrice(""); setTypeFilter(""); }}>
               Clear filters
             </button>
           )}
@@ -96,6 +120,9 @@ function MarketplaceInner() {
                   <div style={{ padding: "0.9rem" }}>
                     <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
                       <span className="badge badge-condition">{l.condition.replace("_", " ")}</span>
+                      {l.type === "FREE" && <span className="badge badge-active">FREE</span>}
+                      {l.type === "RENT" && <span className="badge badge-violet">RENT</span>}
+                      {l.type === "BORROW" && <span className="badge badge-violet">BORROW</span>}
                       {l.status === "SOLD" && <span className="badge badge-sold">SOLD</span>}
                       {l.status === "RESERVED" && <span className="badge badge-verified">RESERVED</span>}
                     </div>

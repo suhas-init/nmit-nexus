@@ -35,6 +35,7 @@ async def list_listings(
     status_filter: str | None = Query(default="ACTIVE", alias="status"),
     min_price: float | None = None,
     max_price: float | None = None,
+    type: str | None = Query(default=None),
     limit: int = Query(default=30, le=100),
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
@@ -48,6 +49,8 @@ async def list_listings(
         stmt = stmt.where(Listing.price >= min_price)
     if max_price is not None:
         stmt = stmt.where(Listing.price <= max_price)
+    if type:
+        stmt = stmt.where(Listing.type == type)
     if q:
         like = f"%{q.lower()}%"
         stmt = stmt.where(or_(func.lower(Listing.title).like(like), func.lower(Listing.description).like(like)))
