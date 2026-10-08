@@ -8,5 +8,6 @@ from app.models.wanted import WantedPost, WantedBid
 from app.models.rating import Rating
 from app.models.notification import Notification
 from app.models.favourite import Favourite
+from app.models.meetup import MeetupPoint
 
-__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover", "WantedPost", "WantedBid", "Rating", "Notification", "Favourite"]
+__all__ = ["User", "Category", "Listing", "ListingImage", "Conversation", "Message", "Offer", "Handover", "WantedPost", "WantedBid", "Rating", "Notification", "Favourite", "MeetupPoint"]

@@ -11,6 +11,7 @@ import { PricePulse } from "@/components/price-pulse";
 import { CopyId } from "@/components/copy-id";
 import { ListingGallery } from "@/components/listing-gallery";
 import { FavouriteButton } from "@/components/favourite-button";
+import { MeetupMap } from "@/components/meetup-map";
 import { useState } from "react";
 
 export default function ListingDetailPage() {
@@ -111,6 +112,10 @@ export default function ListingDetailPage() {
 
           <div style={{ marginBottom: "1rem" }}>
             <PricePulse listingId={listing.id} />
+          </div>
+
+          <div style={{ marginBottom: "1rem" }}>
+            <MeetupMap />
           </div>
 
           <div className="card" style={{ padding: "1.25rem" }}>
