@@ -4,7 +4,6 @@ import { create } from "zustand";
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
-  // Free public TURN — required for cross-network (mobile data, different WiFi)
   { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
   { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
   { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
@@ -33,14 +32,36 @@ export const useCallStore = create<Store>((set) => ({
 
 const setState = (s: CallState) => useCallStore.getState().setState(s);
 
-function ensureAudioEl() {
+function ensureAudioEl(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
   if (!remoteAudioEl) {
     remoteAudioEl = document.createElement("audio");
     remoteAudioEl.autoplay = true;
+    (remoteAudioEl as any).playsInline = true;
+    remoteAudioEl.setAttribute("playsinline", "true");
+    remoteAudioEl.setAttribute("webkit-playsinline", "true");
+    remoteAudioEl.muted = false;
+    remoteAudioEl.volume = 1;
+    remoteAudioEl.style.position = "fixed";
+    remoteAudioEl.style.width = "1px";
+    remoteAudioEl.style.height = "1px";
+    remoteAudioEl.style.opacity = "0";
+    remoteAudioEl.style.pointerEvents = "none";
     document.body.appendChild(remoteAudioEl);
   }
   return remoteAudioEl;
+}
+
+async function tryPlay(el: HTMLAudioElement, attempts = 6) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await el.play();
+      return true;
+    } catch (err) {
+      await new Promise((r) => setTimeout(r, 200 + i * 150));
+    }
+  }
+  return false;
 }
 
 function playRingtone(kind: "incoming" | "outgoing") {
@@ -71,23 +92,41 @@ function playRingtone(kind: "incoming" | "outgoing") {
   } catch {}
 }
 function stopRingtone() { ringtone?.stop(); ringtone = null; }
-
 function clearRingTimeout() { if (ringTimeout) { clearTimeout(ringTimeout); ringTimeout = null; } }
 
 function cleanup() {
   stopRingtone();
   clearRingTimeout();
-  if (pc) { try { pc.close(); } catch {} pc = null; }
-  if (localStream) { localStream.getTracks().forEach((t) => t.stop()); localStream = null; }
+  if (pc) {
+    try { pc.getSenders().forEach((s) => { try { s.track?.stop(); } catch {} }); } catch {}
+    try { pc.close(); } catch {}
+    pc = null;
+  }
+  if (localStream) {
+    localStream.getTracks().forEach((t) => { try { t.stop(); } catch {} });
+    localStream = null;
+  }
   if (remoteAudioEl) remoteAudioEl.srcObject = null;
   pendingOffer = null;
   pendingCandidates = [];
 }
 
-async function createPC(peerId: string, ws: WebSocket) {
-  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS, iceCandidatePoolSize: 10 });
+async function createPC(peerId: string, ws: WebSocket, isCaller: boolean) {
+  pc = new RTCPeerConnection({
+    iceServers: ICE_SERVERS,
+    iceCandidatePoolSize: 10,
+    bundlePolicy: "max-bundle",
+  });
 
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  // Explicitly create sendrecv transceiver so both directions are negotiated
+  try {
+    pc.addTransceiver("audio", { direction: "sendrecv" });
+  } catch {}
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    video: false,
+  });
   localStream = stream;
   stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
 
@@ -96,11 +135,28 @@ async function createPC(peerId: string, ws: WebSocket) {
       ws.send(JSON.stringify({ type: "call.ice", to: peerId, candidate: e.candidate }));
     }
   };
-  pc.ontrack = (e) => {
-    const el = ensureAudioEl();
-    if (el) { el.srcObject = e.streams[0]; el.play().catch(() => {}); }
+
+  pc.oniceconnectionstatechange = () => {
+    console.log("[webrtc] ice:", pc?.iceConnectionState);
   };
+
+  pc.ontrack = (e) => {
+    console.log("[webrtc] ontrack:", e.track.kind, "streams:", e.streams.length);
+    const el = ensureAudioEl();
+    if (!el) return;
+    if (e.streams && e.streams[0]) {
+      el.srcObject = e.streams[0];
+    } else {
+      const s = new MediaStream([e.track]);
+      el.srcObject = s;
+    }
+    el.muted = false;
+    el.volume = 1;
+    tryPlay(el).then((ok) => { if (!ok) console.warn("[webrtc] audio play blocked"); });
+  };
+
   pc.onconnectionstatechange = () => {
+    console.log("[webrtc] conn:", pc?.connectionState);
     if (!pc) return;
     if (pc.connectionState === "failed") {
       cleanup();
@@ -108,7 +164,6 @@ async function createPC(peerId: string, ws: WebSocket) {
       setTimeout(() => setState({ status: "idle" }), 2500);
     }
     if (pc.connectionState === "disconnected") {
-      // brief grace period — often recovers
       setTimeout(() => {
         if (pc && pc.connectionState === "disconnected") {
           cleanup();
@@ -118,6 +173,7 @@ async function createPC(peerId: string, ws: WebSocket) {
       }, 5000);
     }
   };
+
   return pc;
 }
 
@@ -130,10 +186,17 @@ export const callActions = {
     }
     const cur = useCallStore.getState().state;
     if (cur.status !== "idle") return;
+
+    // Ensure clean slate from any previous call
+    cleanup();
+    // Force user-gesture audio unlock — helps mobile Safari/Chrome
+    const el = ensureAudioEl();
+    if (el) { try { await el.play().catch(() => {}); } catch {} }
+
     try {
       setState({ status: "calling", peerId, peerName });
       playRingtone("outgoing");
-      // if nobody answers in 30s, auto-end
+
       clearRingTimeout();
       ringTimeout = setTimeout(() => {
         if (useCallStore.getState().state.status === "calling") {
@@ -144,11 +207,12 @@ export const callActions = {
         }
       }, 30000);
 
-      const conn = await createPC(peerId, ws);
-      const offer = await conn.createOffer();
+      const conn = await createPC(peerId, ws, true);
+      const offer = await conn.createOffer({ offerToReceiveAudio: true });
       await conn.setLocalDescription(offer);
       ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: offer, peerName: myName }));
     } catch (e) {
+      console.error("[webrtc] startCall failed", e);
       cleanup();
       setState({ status: "ended", reason: "Microphone blocked" });
       setTimeout(() => setState({ status: "idle" }), 2500);
@@ -158,18 +222,26 @@ export const callActions = {
   acceptCall: async (ws: WebSocket | null) => {
     const cur = useCallStore.getState().state;
     if (cur.status !== "incoming" || !ws || !pendingOffer) return;
+    const offer = pendingOffer;
+
+    // unlock audio element via the Accept click gesture
+    const el = ensureAudioEl();
+    if (el) { try { await el.play().catch(() => {}); } catch {} }
+
     try {
       stopRingtone();
-      const conn = await createPC(cur.peerId, ws);
-      await conn.setRemoteDescription(new RTCSessionDescription(pendingOffer));
-      const answer = await conn.createAnswer();
+      clearRingTimeout();
+      const conn = await createPC(cur.peerId, ws, false);
+      await conn.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await conn.createAnswer({ offerToReceiveAudio: true });
       await conn.setLocalDescription(answer);
       ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: answer }));
       for (const c of pendingCandidates) { try { await conn.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
       pendingCandidates = [];
       pendingOffer = null;
       setState({ status: "active", peerId: cur.peerId, peerName: cur.peerName, muted: false });
-    } catch {
+    } catch (e) {
+      console.error("[webrtc] acceptCall failed", e);
       cleanup();
       setState({ status: "ended", reason: "Could not connect" });
       setTimeout(() => setState({ status: "idle" }), 2000);
@@ -212,7 +284,6 @@ export const callActions = {
       pendingCandidates = [];
       setState({ status: "incoming", peerId: msg.from, peerName: msg.peerName || "Someone" });
       playRingtone("incoming");
-      // 30s auto-decline if unanswered
       clearRingTimeout();
       ringTimeout = setTimeout(() => {
         const s = useCallStore.getState().state;
@@ -231,12 +302,14 @@ export const callActions = {
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
         for (const c of pendingCandidates) { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
         pendingCandidates = [];
-      } catch {}
+      } catch (e) {
+        console.error("[webrtc] setRemoteDescription(answer) failed", e);
+      }
       const s = useCallStore.getState().state;
       if (s.status === "calling") setState({ status: "active", peerId: s.peerId, peerName: s.peerName, muted: false });
     }
     else if (msg.type === "call.ice") {
-      if (pc && pc.remoteDescription) {
+      if (pc && pc.remoteDescription && pc.remoteDescription.type) {
         try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch {}
       } else {
         pendingCandidates.push(msg.candidate);
