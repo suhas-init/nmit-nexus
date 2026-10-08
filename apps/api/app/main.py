@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, listings, categories, external, offers, offers_mine, handovers, wanted, ai, price_pulse, ratings, notifications, images, receipt, favourites, users, meetups
+from app.api.routes import auth, listings, categories, external, offers, offers_mine, handovers, wanted, ai, price_pulse, ratings, notifications, images, receipt, favourites, users, meetups, stats
 from app.db.session import engine
 from app.ws.routes import router as ws_router
 
@@ -38,6 +38,7 @@ app.include_router(receipt.router)
 app.include_router(favourites.router)
 app.include_router(users.router)
 app.include_router(meetups.router)
+app.include_router(stats.router)
 app.include_router(ws_router)
 
 

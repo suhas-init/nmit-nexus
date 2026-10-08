@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DotGrid } from "@/components/dot-grid";
 import { Magnetic } from "@/components/magnetic";
+import { LiveStats } from "@/components/live-stats";
 
 const MARQUEE = [
   "24 LISTINGS ACTIVE",
@@ -182,6 +183,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <LiveStats />
 
       {/* CTA — minimal */}
       <section className="reveal" style={{ maxWidth: 900, margin: "6rem auto 0", textAlign: "center", padding: "3rem 2rem", border: "1px solid var(--border-0)", borderRadius: 14, background: "var(--bg-1)" }}>
