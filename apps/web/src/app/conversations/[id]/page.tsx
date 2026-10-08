@@ -39,7 +39,7 @@ export default function ConversationPage() {
     queryKey: ["messages", id],
     queryFn: () => offersApi.messages(id, accessToken!),
     enabled: !!accessToken,
-    refetchInterval: 3000,
+    refetchInterval: 15000,
   });
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);

@@ -238,6 +238,14 @@ async def send_message(
         "title": "New message",
         "href": f"/conversations/{conversation_id}",
         "conversation_id": str(conversation_id),
+        "message": {
+            "id": str(msg.id),
+            "conversation_id": str(conversation_id),
+            "sender_id": str(user.id),
+            "message_type": "TEXT",
+            "body": msg.body,
+            "created_at": msg.created_at.isoformat() if msg.created_at else None,
+        },
     })
     await db.commit()
     return _msg_out(msg)

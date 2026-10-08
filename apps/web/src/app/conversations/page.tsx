@@ -27,7 +27,7 @@ export default function ConversationsPage() {
     queryKey: ["conversations", user?.id],
     queryFn: () => api.get<EnrichedConv[]>("/conversations/enriched", accessToken!),
     enabled: !!user && !!accessToken,
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
 
   if (!user) return <div className="card" style={{ padding: "3rem", textAlign: "center" }}>Sign in to view chats.</div>;
