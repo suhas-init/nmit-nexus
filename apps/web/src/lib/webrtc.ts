@@ -118,11 +118,7 @@ async function createPC(peerId: string, ws: WebSocket, isCaller: boolean) {
     bundlePolicy: "max-bundle",
   });
 
-  // Explicitly create sendrecv transceiver so both directions are negotiated
-  try {
-    pc.addTransceiver("audio", { direction: "sendrecv" });
-  } catch {}
-
+  console.log("[webrtc] createPC start, isCaller:", isCaller);
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
     video: false,
@@ -192,8 +188,10 @@ export const callActions = {
     if (el) { try { await el.play().catch(() => {}); } catch {} }
 
     try {
+      console.log("[webrtc] startCall — setting calling state");
       setState({ status: "calling", peerId, peerName });
       playRingtone("outgoing");
+      console.log("[webrtc] ringtone started");
 
       clearRingTimeout();
       ringTimeout = setTimeout(() => {
@@ -206,9 +204,12 @@ export const callActions = {
       }, 30000);
 
       const conn = await createPC(peerId, ws, true);
-      const offer = await conn.createOffer({ offerToReceiveAudio: true });
+      console.log("[webrtc] pc created, creating offer");
+      const offer = await conn.createOffer();
       await conn.setLocalDescription(offer);
+      console.log("[webrtc] offer set, sending");
       ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: offer, peerName: myName }));
+      console.log("[webrtc] offer sent");
     } catch (e) {
       console.error("[webrtc] startCall failed", e);
       cleanup();
@@ -230,8 +231,10 @@ export const callActions = {
       stopRingtone();
       clearRingTimeout();
       const conn = await createPC(cur.peerId, ws, false);
+      console.log("[webrtc] answer side: pc created");
       await conn.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await conn.createAnswer({ offerToReceiveAudio: true });
+      console.log("[webrtc] remote offer set");
+      const answer = await conn.createAnswer();
       await conn.setLocalDescription(answer);
       ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: answer }));
       for (const c of pendingCandidates) { try { await conn.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
