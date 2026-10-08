@@ -990,3 +990,197 @@ html[data-theme="light"] {
   --bubble-theirs-text: #1A1815;
   --badge-offer-bg: rgba(180, 83, 9, 0.10);
 }
+
+/* ============================================================ */
+/* GLOBAL RESPONSIVE + MOTION MASTER PASS                      */
+/* ============================================================ */
+
+/* 1. Viewport fit — no zoom weirdness, no bounce, safe areas */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+}
+body {
+  overflow-x: clip;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  font-size: clamp(15px, 0.9vw + 12px, 17px);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+}
+
+/* 2. Fluid typography scale */
+h1 { font-size: clamp(1.5rem, 2.6vw + 1rem, 2rem); line-height: 1.15; }
+h2 { font-size: clamp(1.15rem, 1.2vw + 0.9rem, 1.4rem); line-height: 1.2; }
+h3 { font-size: clamp(1rem, 0.6vw + 0.85rem, 1.15rem); }
+p, li { max-width: 78ch; }
+
+/* 3. Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee, .cursor-blink, .pulse-dot, .aurora::before, .aurora::after { animation: none !important; }
+}
+
+/* 4. Kill hover effects on touch-only devices */
+@media (hover: none) {
+  .lift:hover { transform: none !important; }
+  .card:hover { border-color: var(--border-0) !important; }
+  .dot-grid::after { opacity: 0 !important; }
+  .cursor-glow { display: none !important; }
+  .expand-hint { display: none !important; }
+}
+
+/* 5. Touch targets minimum 44px on mobile */
+@media (max-width: 900px) {
+  .btn, button, a.btn, input, select, textarea { min-height: 40px; }
+  .btn { padding: 0.6rem 0.95rem !important; }
+  .nav-link { min-width: 40px; min-height: 40px; }
+}
+
+/* 6. Images and media never overflow */
+img, video, canvas, svg { max-width: 100%; height: auto; display: block; }
+img { content-visibility: auto; }
+
+/* 7. Fluid container padding */
+main { padding-inline: clamp(0.85rem, 2.5vw, 2rem) !important; }
+
+/* 8. Grids → single column gracefully */
+@media (max-width: 1100px) {
+  .hero-split { grid-template-columns: 1fr !important; gap: 2.5rem !important; }
+}
+@media (max-width: 900px) {
+  .grid-features { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 640px) {
+  .grid-features { grid-template-columns: 1fr !important; }
+  .grid-features > * { border-right: none !important; border-bottom: 1px solid var(--border-0) !important; padding: 1.25rem !important; }
+  .grid-features > *:last-child { border-bottom: none !important; }
+}
+
+/* 9. Marketplace: sidebar becomes horizontal filter bar */
+@media (max-width: 900px) {
+  .market-layout { grid-template-columns: 1fr !important; }
+  .market-sidebar { position: static !important; padding: 0.9rem !important; }
+  .market-sidebar > * { margin-bottom: 0.75rem !important; }
+}
+@media (max-width: 640px) {
+  .market-sidebar { display: none !important; }
+  .mobile-filters-toggle { display: flex !important; }
+}
+
+/* 10. Listing detail — stack */
+@media (max-width: 900px) {
+  .detail-split { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+  .detail-split > aside { position: static !important; }
+}
+
+/* 11. Dashboard stat grid — 2x2 on mobile */
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
+  .stats-grid .card { padding: 0.9rem !important; }
+}
+
+/* 12. Chat: bubbles stay readable on tiny screens */
+@media (max-width: 640px) {
+  .chat-bubble, [data-bubble] { font-size: 0.9rem; }
+}
+@media (max-width: 400px) {
+  .chat-bubble, [data-bubble] { font-size: 0.85rem; }
+}
+
+/* 13. Command palette: full screen on mobile */
+@media (max-width: 640px) {
+  .cmd-palette-wrap { padding: 0 !important; align-items: stretch !important; }
+  .cmd-palette {
+    max-width: 100% !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* 14. Hero dot grid hidden on phones (needs cursor to be useful) */
+@media (hover: none) {
+  .hero-dotgrid { display: none !important; }
+}
+@media (max-width: 768px) {
+  .hero-dotgrid { display: none !important; }
+}
+
+/* 15. Marquee slower + thinner on small screens */
+@media (max-width: 640px) {
+  .marquee { animation-duration: 60s !important; }
+  .marquee > span { font-size: 0.62rem !important; padding: 0 1rem !important; }
+}
+
+/* 16. Tables scroll horizontally, never break layout */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* 17. Focus ring for keyboard nav */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus:not(:focus-visible) { outline: none; }
+
+/* 18. Selection color */
+::selection { background: var(--accent); color: var(--bg-0); }
+
+/* 19. Sticky elements respect notch */
+.sticky-top { top: max(0px, env(safe-area-inset-top)); }
+
+/* 20. Prevent iOS input zoom (font-size >= 16px) */
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* 21. Gallery lightbox fills viewport properly on mobile */
+@media (max-width: 640px) {
+  .lightbox-img { max-height: 70dvh !important; }
+}
+
+/* 22. Wrap long IDs / hashes cleanly */
+.mono.break-all, code, pre { word-break: break-word; overflow-wrap: anywhere; }
+
+/* 23. Smooth theme transition only after load (prevents flash) */
+.theme-transition-ready * {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+}
+
+/* 24. Grid image cards — consistent ratio */
+.card-img-fixed { aspect-ratio: 4 / 3; overflow: hidden; }
+.card-img-fixed img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 25. Extra-small phones (<360px) */
+@media (max-width: 360px) {
+  .btn { font-size: 0.72rem !important; padding: 0.5rem 0.7rem !important; }
+  h1 { font-size: 1.35rem !important; }
+  .hide-xxs { display: none !important; }
+}
+
+/* 26. Landscape phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-split { padding: 2rem 0 1.5rem !important; }
+  .marquee { display: none; }
+}
+
+/* 27. Large desktop — cap line lengths */
+@media (min-width: 1440px) {
+  main { max-width: 1280px !important; }
+}
+
+/* 28. Ultra-wide — center everything gracefully */
+@media (min-width: 1920px) {
+  html { font-size: 17px; }
+}
