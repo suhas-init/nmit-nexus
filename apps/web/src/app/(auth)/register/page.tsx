@@ -33,7 +33,7 @@ export default function RegisterPage() {
       const res = await api.post<{ access_token: string; refresh_token: string }>("/auth/register", data);
       setTokens(res.access_token, res.refresh_token);
       await fetchMe();
-      router.push("/marketplace");
+      router.push("/verify");
     } catch (e) {
       const err = e as ApiError;
       setErr(err.detail || "Registration failed");

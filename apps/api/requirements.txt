@@ -16,3 +16,4 @@ google-genai==1.56.0
 groq
 groq
 reportlab==4.2.5
+resend==2.5.1

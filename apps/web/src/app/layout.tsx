@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { CursorGlow } from "@/components/cursor-glow";
 import { GridBg } from "@/components/grid-bg";
 import { CommandPalette } from "@/components/command-palette";
+import { VerifyBanner } from "@/components/verify-banner";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import { PwaRegister } from "@/components/pwa-register";
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CommandPalette />
           <Navbar />
           <main style={{ flex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "1.5rem 1rem 3rem" }}>
+            <VerifyBanner />
             {children}
           </main>
           <Footer />

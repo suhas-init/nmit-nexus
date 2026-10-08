@@ -24,6 +24,7 @@ class UserOut(BaseModel):
     email: str
     department: str | None = None
     campus_verified: bool = False
+    email_verified: bool = False
     avatar_url: str | None = None
     bio: str | None = None
     completed_transactions: int = 0

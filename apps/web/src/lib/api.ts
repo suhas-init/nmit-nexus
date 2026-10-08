@@ -83,6 +83,7 @@ export type User = {
   email: string;
   department: string | null;
   campus_verified: boolean;
+  email_verified: boolean;
   avatar_url: string | null;
   bio: string | null;
   completed_transactions: number;
