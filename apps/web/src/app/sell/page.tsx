@@ -131,6 +131,8 @@ export default function SellPage() {
           {errors.description && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.description.message}</p>}
         </div>
 
+        <ImageUploader urls={imageUrls} onChange={setImageUrls} max={5} />
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           <div>
             <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Price (₹)</label>
