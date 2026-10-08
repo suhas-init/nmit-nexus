@@ -52,7 +52,7 @@ export function Navbar() {
           <ThemeToggle />
           {user ? (
             <>
-              <Link href="/dashboard" className="btn btn-outline" style={{ padding: "0.35rem 0.65rem", fontSize: "0.72rem" }}>
+              <Link href="/profile" className="btn btn-outline" style={{ padding: "0.35rem 0.65rem", fontSize: "0.72rem" }}>
                 <UserIcon size={13} /> <span className="hide-xs">{user.name.split(" ")[0]}</span>
               </Link>
               <NotifBell />

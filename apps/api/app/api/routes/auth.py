@@ -142,6 +142,33 @@ async def verify_email(
     return {"ok": True, "campus_verified": user.campus_verified}
 
 
+class ProfileUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=120)
+    bio: str | None = Field(default=None, max_length=500)
+    department: str | None = Field(default=None, max_length=60)
+    avatar_url: str | None = Field(default=None, max_length=600)
+
+
+@router.patch("/me", response_model=UserOut)
+async def update_me(
+    body: ProfileUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    data = body.model_dump(exclude_unset=True)
+    if "name" in data and data["name"]:
+        user.name = data["name"].strip()
+    if "bio" in data:
+        user.bio = (data["bio"] or "").strip() or None
+    if "department" in data:
+        user.department = (data["department"] or "").strip() or None
+    if "avatar_url" in data:
+        user.avatar_url = (data["avatar_url"] or "").strip() or None
+    await db.commit()
+    await db.refresh(user)
+    return _user_out(user)
+
+
 @router.post("/resend-code")
 async def resend_code(
     user: User = Depends(get_current_user),

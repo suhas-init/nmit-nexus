@@ -111,9 +111,9 @@ export default function ListingDetailPage() {
           </div>
 
           <div className="card" style={{ padding: "1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", fontWeight: 700, color: "var(--text-0)", fontSize: "0.9rem" }}>
-              <ShieldCheck size={16} style={{ color: "#1e7a3f" }} /> Trusted seller
-            </div>
+            <Link href={`/u/${listing.seller_id}`} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", fontWeight: 700, color: "var(--accent)", fontSize: "0.9rem", textDecoration: "none" }}>
+              <ShieldCheck size={16} /> View seller profile →
+            </Link>
             <div style={{ fontSize: "0.85rem", marginBottom: "0.35rem" }}>Campus verified</div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.85rem", color: "#94a3b8" }}>
               <MapPin size={13} /> Campus meetup point
