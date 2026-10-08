@@ -1,13 +1,20 @@
 "use client";
 import { create } from "zustand";
 
-const ICE_SERVERS = [
-  { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:stun2.l.google.com:19302" },
-  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun.cloudflare.com:3478"] },
+  // OpenRelay public TURN — multiple transports, add all
+  {
+    urls: [
+      "turn:openrelay.metered.ca:80",
+      "turn:openrelay.metered.ca:443",
+      "turn:openrelay.metered.ca:443?transport=tcp",
+      "turn:openrelay.metered.ca:80?transport=tcp",
+      "turns:openrelay.metered.ca:443?transport=tcp",
+    ],
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
 ];
 
 const AUDIO_CONSTRAINTS: MediaStreamConstraints = {
@@ -162,6 +169,30 @@ function forceSendRecv(conn: RTCPeerConnection) {
   }
 }
 
+
+// Wait for ICE gathering to complete — embeds all candidates in the SDP.
+// Trickle ICE fails on strict networks; non-trickle is more reliable for demos.
+function waitForIceGathering(conn: RTCPeerConnection, timeoutMs = 4000): Promise<void> {
+  return new Promise((resolve) => {
+    if (conn.iceGatheringState === "complete") {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(() => {
+      conn.removeEventListener("icegatheringstatechange", check);
+      resolve();
+    }, timeoutMs);
+    const check = () => {
+      if (conn.iceGatheringState === "complete") {
+        clearTimeout(timer);
+        conn.removeEventListener("icegatheringstatechange", check);
+        resolve();
+      }
+    };
+    conn.addEventListener("icegatheringstatechange", check);
+  });
+}
+
 function basePC(peerId: string, ws: WebSocket) {
   const conn = new RTCPeerConnection({
     iceServers: ICE_SERVERS,
@@ -275,7 +306,9 @@ export const callActions = {
       offer.sdp = (offer.sdp || "").replace(/a=(recvonly|sendonly)/g, "a=sendrecv");
       await pc.setLocalDescription(offer);
       forceSendRecv(pc);
-      console.log("[webrtc] caller offer ready, sending");
+      console.log("[webrtc] caller gathering ICE (waiting up to 4s)…");
+      await waitForIceGathering(pc);
+      console.log("[webrtc] caller ICE gathered, sending offer");
 
       ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: pc.localDescription, peerName: myName }));
     } catch (e) {
@@ -343,7 +376,9 @@ export const callActions = {
       answer.sdp = (answer.sdp || "").replace(/a=(recvonly|sendonly)/g, "a=sendrecv");
       await pc.setLocalDescription(answer);
       forceSendRecv(pc);
-      console.log("[webrtc] callee answer ready, sending");
+      console.log("[webrtc] callee gathering ICE (waiting up to 4s)…");
+      await waitForIceGathering(pc);
+      console.log("[webrtc] callee ICE gathered, sending answer");
 
       ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: pc.localDescription }));
 
