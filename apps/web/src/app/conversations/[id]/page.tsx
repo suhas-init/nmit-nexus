@@ -8,6 +8,7 @@ import { offersApi } from "@/lib/offers";
 import { api } from "@/lib/api";
 import { timeAgo } from "@/lib/utils";
 import { Send, ArrowLeft, BadgeCheck } from "lucide-react";
+import { CallButton } from "@/components/call-button";
 
 type EnrichedConv = {
   id: string;
@@ -72,7 +73,7 @@ export default function ConversationPage() {
               </span>
             )}
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, color: "var(--text-0)", fontSize: "0.98rem" }}>
               {myConv.with_user.name}
               {myConv.with_user.campus_verified && <BadgeCheck size={13} style={{ color: "var(--accent)" }} />}
@@ -81,6 +82,9 @@ export default function ConversationPage() {
               re: {myConv.listing_title || "listing"}
             </Link>
           </div>
+          {myConv.with_user.id && (
+            <CallButton peerId={myConv.with_user.id} peerName={myConv.with_user.name} />
+          )}
         </div>
       )}
 

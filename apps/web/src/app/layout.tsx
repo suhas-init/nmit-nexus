@@ -8,6 +8,7 @@ import { CursorGlow } from "@/components/cursor-glow";
 import { GridBg } from "@/components/grid-bg";
 import { CommandPalette } from "@/components/command-palette";
 import { VerifyBanner } from "@/components/verify-banner";
+import { CallUI } from "@/components/call-ui";
 import { ScrollProgress } from "@/components/scroll-progress";
 import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import { PwaRegister } from "@/components/pwa-register";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
           <Footer />
+          <CallUI />
         </Providers>
       </body>
     </html>

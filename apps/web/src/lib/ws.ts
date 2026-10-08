@@ -2,14 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/store/auth";
 
-export type WsEvent = {
-  type: string;
-  [key: string]: any;
-};
+export type WsEvent = { type: string; [key: string]: any };
+
+// module-level shared ref — used by useWebRTC too
+export const sharedWsRef: { current: WebSocket | null } = { current: null };
 
 export function useRealtime(onEvent?: (e: WsEvent) => void) {
   const { accessToken } = useAuth();
-  const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
@@ -18,10 +17,10 @@ export function useRealtime(onEvent?: (e: WsEvent) => void) {
     if (!accessToken) return;
     const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
     const ws = new WebSocket(`${base}/ws?token=${encodeURIComponent(accessToken)}`);
-    wsRef.current = ws;
+    sharedWsRef.current = ws;
 
     ws.onopen = () => setConnected(true);
-    ws.onclose = () => setConnected(false);
+    ws.onclose = () => { setConnected(false); if (sharedWsRef.current === ws) sharedWsRef.current = null; };
     ws.onerror = () => setConnected(false);
     ws.onmessage = (ev) => {
       try {
@@ -37,6 +36,7 @@ export function useRealtime(onEvent?: (e: WsEvent) => void) {
     return () => {
       clearInterval(ping);
       ws.close();
+      if (sharedWsRef.current === ws) sharedWsRef.current = null;
     };
   }, [accessToken]);
 

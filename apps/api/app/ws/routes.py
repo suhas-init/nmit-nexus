@@ -1,4 +1,5 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, HTTPException
+import json
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from sqlalchemy import select
 
 from app.core.security import decode_token
@@ -33,6 +34,21 @@ async def ws_endpoint(websocket: WebSocket, token: str = Query(...)):
     await manager.connect(user_id, websocket)
     try:
         while True:
-            await websocket.receive_text()
+            raw = await websocket.receive_text()
+            try:
+                msg = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+
+            msg_type = msg.get("type", "")
+            if msg_type.startswith("call."):
+                target = msg.get("to")
+                if not target:
+                    continue
+                # server stamps the sender ID — client cannot spoof
+                relay = {**msg, "from": user_id}
+                # remove client-provided "from" if any
+                relay.pop("from_id", None)
+                await manager.send_to_user(target, relay)
     except WebSocketDisconnect:
         manager.disconnect(user_id, websocket)
