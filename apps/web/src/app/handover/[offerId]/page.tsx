@@ -7,7 +7,7 @@ import { useAuth } from "@/store/auth";
 import { handoversApi, Handover } from "@/lib/handovers";
 import { CheckCircle2, ShieldCheck, KeyRound, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, Download } from "lucide-react";
 
 export default function HandoverPage() {
   const { offerId } = useParams<{ offerId: string }>();
@@ -74,6 +74,27 @@ export default function HandoverPage() {
               <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem", fontFamily: "inherit" }}>Receipt hash</div>
               {data.receipt_hash}
             </div>
+
+            <button
+              onClick={async () => {
+                const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+                const res = await fetch(`${base}/receipt/${offerId}.pdf`, {
+                  headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                if (!res.ok) { alert("Couldn't download receipt"); return; }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `nmit-nexus-receipt-${offerId.slice(0, 8)}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="btn btn-primary"
+              style={{ width: "100%", marginTop: "1rem", marginBottom: "1rem" }}
+            >
+              <Download size={14} /> Download PDF receipt
+            </button>
             <RateDeal offerId={offerId} accessToken={accessToken!} />
           </div>
         ) : (
