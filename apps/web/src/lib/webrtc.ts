@@ -312,11 +312,30 @@ export const callActions = {
       }
       pendingCandidates = [];
 
-      // 3. Now get the mic and add the track — reuses the transceiver
+      // 3. Now get the mic and attach the track to the EXISTING transceiver
       const stream = await navigator.mediaDevices.getUserMedia(AUDIO_CONSTRAINTS);
       localStream = stream;
+      const audioTrack = stream.getAudioTracks()[0];
       console.log("[webrtc] callee got mic, tracks:", stream.getAudioTracks().length);
-      stream.getAudioTracks().forEach((t) => pc!.addTrack(t, stream));
+
+      const tcs = pc.getTransceivers();
+      let attached = false;
+      for (const t of tcs) {
+        // Try to find an audio-capable transceiver from the offer
+        try {
+          if (t.receiver && t.receiver.track && t.receiver.track.kind === "audio") {
+            await t.sender.replaceTrack(audioTrack);
+            t.direction = "sendrecv";
+            attached = true;
+            console.log("[webrtc] callee attached track to existing transceiver");
+            break;
+          }
+        } catch (err) { console.warn("[webrtc] replaceTrack failed", err); }
+      }
+      if (!attached) {
+        console.log("[webrtc] callee no existing transceiver — using addTrack");
+        pc.addTrack(audioTrack, stream);
+      }
       forceSendRecv(pc);
 
       // 4. Create + send the answer
@@ -395,15 +414,19 @@ export const callActions = {
       stopRingtone();
       clearRingTimeout();
       try {
-        // Drain ICE that arrived before answer
-        for (const c of pendingCandidates) {
-          try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-        }
-        pendingCandidates = [];
-
+        // 1. Set the answer FIRST (this is the fix)
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
         console.log("[webrtc] caller: answer applied, transceivers:", pc.getTransceivers().length);
         forceSendRecv(pc);
+
+        // 2. NOW drain the ICE candidates that arrived before the answer
+        const queued = pendingCandidates;
+        pendingCandidates = [];
+        for (const c of queued) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) {
+            console.warn("[webrtc] late candidate failed:", e);
+          }
+        }
       } catch (e) {
         console.error("[webrtc] setRemoteDescription(answer) failed", e);
       }
