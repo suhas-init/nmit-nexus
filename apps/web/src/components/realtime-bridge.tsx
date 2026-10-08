@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRealtime, WsEvent } from "@/lib/ws";
 import { useToasts } from "@/store/toasts";
 import { useAuth } from "@/store/auth";
+import { callActions } from "@/lib/webrtc";
+import { sharedWsRef } from "@/lib/ws";
 
 export function RealtimeBridge() {
   const qc = useQueryClient();
@@ -11,6 +13,10 @@ export function RealtimeBridge() {
 
   useRealtime((e: WsEvent) => {
     if (!user) return;
+    if (e.type.startsWith("call.") && sharedWsRef.current) {
+      callActions.handleWsMessage(e, sharedWsRef.current);
+      return;
+    }
     switch (e.type) {
       case "offer.created":
         qc.invalidateQueries({ queryKey: ["offers-inbox"] });

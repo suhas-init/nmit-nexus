@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { create } from "zustand";
 
 const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 
@@ -10,202 +10,216 @@ export type CallState =
   | { status: "active"; peerId: string; peerName: string; muted: boolean }
   | { status: "ended"; reason?: string };
 
-type WsMessage = {
-  type: string;
-  to?: string;
-  from?: string;
-  sdp?: any;
-  candidate?: any;
-  peerName?: string;
+// module-level singletons — shared across all components
+let pc: RTCPeerConnection | null = null;
+let localStream: MediaStream | null = null;
+let remoteAudioEl: HTMLAudioElement | null = null;
+let ringtone: { stop: () => void } | null = null;
+
+type Store = {
+  state: CallState;
+  setState: (s: CallState) => void;
 };
 
-export function useWebRTC(wsRef: React.MutableRefObject<WebSocket | null>, myName: string) {
-  const [state, setState] = useState<CallState>({ status: "idle" });
-  const pcRef = useRef<RTCPeerConnection | null>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
-  const pendingOfferRef = useRef<any>(null);
-  const pendingCandidatesRef = useRef<any[]>([]);
+export const useCallStore = create<Store>((set) => ({
+  state: { status: "idle" },
+  setState: (s) => set({ state: s }),
+}));
 
-  // Create hidden audio element once
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!remoteAudioRef.current) {
-      const el = document.createElement("audio");
-      el.autoplay = true;
-      remoteAudioRef.current = el;
+function ensureAudioEl() {
+  if (typeof window === "undefined") return null;
+  if (!remoteAudioEl) {
+    remoteAudioEl = document.createElement("audio");
+    remoteAudioEl.autoplay = true;
+    document.body.appendChild(remoteAudioEl);
+  }
+  return remoteAudioEl;
+}
+
+function playRingtone(kind: "incoming" | "outgoing") {
+  stopRingtone();
+  if (typeof window === "undefined") return;
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.15;
+    gain.connect(ctx.destination);
+    let stopped = false;
+    const beep = (freq: number, dur: number, delay: number) => {
+      const osc = ctx.createOscillator();
+      osc.frequency.value = freq;
+      osc.type = "sine";
+      osc.connect(gain);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur);
+    };
+    const loop = () => {
+      if (stopped) return;
+      if (kind === "incoming") {
+        beep(880, 0.4, 0);
+        beep(660, 0.4, 0.5);
+      } else {
+        beep(440, 0.6, 0);
+      }
+      setTimeout(loop, kind === "incoming" ? 2000 : 2500);
+    };
+    loop();
+    ringtone = { stop: () => { stopped = true; try { ctx.close(); } catch {} } };
+  } catch {}
+}
+
+function stopRingtone() {
+  ringtone?.stop();
+  ringtone = null;
+}
+
+function cleanup() {
+  stopRingtone();
+  if (pc) { try { pc.close(); } catch {} pc = null; }
+  if (localStream) { localStream.getTracks().forEach((t) => t.stop()); localStream = null; }
+  if (remoteAudioEl) remoteAudioEl.srcObject = null;
+}
+
+async function createPC(peerId: string, ws: WebSocket, setState: (s: CallState) => void) {
+  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  localStream = stream;
+  stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: "call.ice", to: peerId, candidate: e.candidate }));
     }
-  }, []);
+  };
 
-  const cleanup = useCallback(() => {
-    if (pcRef.current) { try { pcRef.current.close(); } catch {} pcRef.current = null; }
-    if (localStreamRef.current) { localStreamRef.current.getTracks().forEach((t) => t.stop()); localStreamRef.current = null; }
-    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
-    pendingOfferRef.current = null;
-    pendingCandidatesRef.current = [];
-  }, []);
+  pc.ontrack = (e) => {
+    const el = ensureAudioEl();
+    if (el) { el.srcObject = e.streams[0]; el.play().catch(() => {}); }
+  };
 
-  const createPC = useCallback(async (peerId: string) => {
-    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  pc.onconnectionstatechange = () => {
+    if (!pc) return;
+    if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+      cleanup();
+      setState({ status: "ended", reason: "Connection lost" });
+      setTimeout(() => setState({ status: "idle" }), 2000);
+    }
+  };
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    localStreamRef.current = stream;
-    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+  return pc;
+}
 
-    pc.onicecandidate = (e) => {
-      if (e.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: "call.ice",
-          to: peerId,
-          candidate: e.candidate,
-        }));
-      }
-    };
-
-    pc.ontrack = (e) => {
-      if (remoteAudioRef.current) {
-        remoteAudioRef.current.srcObject = e.streams[0];
-        remoteAudioRef.current.play().catch(() => {});
-      }
-    };
-
-    pc.onconnectionstatechange = () => {
-      if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
-        cleanup();
-        setState({ status: "ended", reason: "Connection lost" });
-        setTimeout(() => setState({ status: "idle" }), 2000);
-      }
-    };
-
-    pcRef.current = pc;
-    return pc;
-  }, [wsRef, cleanup]);
-
-  const startCall = useCallback(async (peerId: string, peerName: string) => {
+export const callActions = {
+  startCall: async (peerId: string, peerName: string, ws: WebSocket | null, myName: string) => {
+    if (!ws) return;
+    const setState = useCallStore.getState().setState;
     try {
       setState({ status: "calling", peerId, peerName });
-      const pc = await createPC(peerId);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      wsRef.current?.send(JSON.stringify({
-        type: "call.offer",
-        to: peerId,
-        sdp: offer,
-        peerName: myName,
-      }));
-    } catch (err) {
+      playRingtone("outgoing");
+      const conn = await createPC(peerId, ws, setState);
+      const offer = await conn.createOffer();
+      await conn.setLocalDescription(offer);
+      ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: offer, peerName: myName }));
+    } catch (e) {
       cleanup();
       setState({ status: "ended", reason: "Mic permission denied" });
       setTimeout(() => setState({ status: "idle" }), 2500);
     }
-  }, [createPC, wsRef, myName, cleanup]);
+  },
 
-  const acceptCall = useCallback(async () => {
-    if (state.status !== "incoming" || !pendingOfferRef.current) return;
+  acceptCall: async (ws: WebSocket | null) => {
+    const { state, setState } = useCallStore.getState();
+    if (state.status !== "incoming" || !ws) return;
+    const offer = (window as any).__pendingOffer;
+    if (!offer) return;
     try {
-      const { peerId, peerName } = state;
-      const pc = await createPC(peerId);
-      await pc.setRemoteDescription(new RTCSessionDescription(pendingOfferRef.current));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      wsRef.current?.send(JSON.stringify({
-        type: "call.answer",
-        to: peerId,
-        sdp: answer,
-      }));
-      // flush queued ICE
-      for (const c of pendingCandidatesRef.current) {
-        try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-      }
-      pendingCandidatesRef.current = [];
-      pendingOfferRef.current = null;
-      setState({ status: "active", peerId, peerName, muted: false });
-    } catch (err) {
+      stopRingtone();
+      const conn = await createPC(state.peerId, ws, setState);
+      await conn.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await conn.createAnswer();
+      await conn.setLocalDescription(answer);
+      ws.send(JSON.stringify({ type: "call.answer", to: state.peerId, sdp: answer }));
+      const queued = (window as any).__pendingCandidates || [];
+      for (const c of queued) { try { await conn.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
+      (window as any).__pendingCandidates = [];
+      (window as any).__pendingOffer = null;
+      setState({ status: "active", peerId: state.peerId, peerName: state.peerName, muted: false });
+    } catch {
       cleanup();
       setState({ status: "ended", reason: "Could not connect" });
       setTimeout(() => setState({ status: "idle" }), 2000);
     }
-  }, [state, createPC, wsRef, cleanup]);
+  },
 
-  const declineCall = useCallback(() => {
-    if (state.status === "incoming") {
-      wsRef.current?.send(JSON.stringify({ type: "call.decline", to: state.peerId }));
-    }
+  declineCall: (ws: WebSocket | null) => {
+    const { state, setState } = useCallStore.getState();
+    if (state.status === "incoming" && ws) ws.send(JSON.stringify({ type: "call.decline", to: state.peerId }));
     cleanup();
     setState({ status: "idle" });
-  }, [state, wsRef, cleanup]);
+  },
 
-  const endCall = useCallback(() => {
-    if (state.status === "active" || state.status === "calling") {
-      wsRef.current?.send(JSON.stringify({ type: "call.end", to: state.peerId }));
+  endCall: (ws: WebSocket | null) => {
+    const { state, setState } = useCallStore.getState();
+    if ((state.status === "active" || state.status === "calling") && ws) {
+      ws.send(JSON.stringify({ type: "call.end", to: state.peerId }));
     }
     cleanup();
     setState({ status: "ended", reason: "Call ended" });
     setTimeout(() => setState({ status: "idle" }), 1500);
-  }, [state, wsRef, cleanup]);
+  },
 
-  const toggleMute = useCallback(() => {
-    if (state.status !== "active") return;
-    const stream = localStreamRef.current;
-    if (!stream) return;
-    const track = stream.getAudioTracks()[0];
+  toggleMute: () => {
+    const { state, setState } = useCallStore.getState();
+    if (state.status !== "active" || !localStream) return;
+    const track = localStream.getAudioTracks()[0];
     if (track) {
       track.enabled = !track.enabled;
       setState({ ...state, muted: !track.enabled });
     }
-  }, [state]);
+  },
 
-  // Handle incoming WS messages
-  useEffect(() => {
-    const handler = async (e: MessageEvent) => {
-      let msg: WsMessage;
-      try { msg = JSON.parse(e.data); } catch { return; }
-
-      if (msg.type === "call.offer") {
-        if (state.status !== "idle") {
-          // busy — auto-decline
-          wsRef.current?.send(JSON.stringify({ type: "call.decline", to: msg.from }));
-          return;
-        }
-        pendingOfferRef.current = msg.sdp;
-        setState({ status: "incoming", peerId: msg.from!, peerName: msg.peerName || "Someone" });
+  handleWsMessage: async (msg: any, ws: WebSocket) => {
+    const { state, setState } = useCallStore.getState();
+    if (msg.type === "call.offer") {
+      if (state.status !== "idle") {
+        ws.send(JSON.stringify({ type: "call.decline", to: msg.from }));
+        return;
       }
-      else if (msg.type === "call.answer") {
-        const pc = pcRef.current;
-        if (!pc) return;
+      (window as any).__pendingOffer = msg.sdp;
+      (window as any).__pendingCandidates = [];
+      setState({ status: "incoming", peerId: msg.from, peerName: msg.peerName || "Someone" });
+      playRingtone("incoming");
+    }
+    else if (msg.type === "call.answer") {
+      if (!pc) return;
+      stopRingtone();
+      try {
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
-        for (const c of pendingCandidatesRef.current) {
-          try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-        }
-        pendingCandidatesRef.current = [];
-        setState((s) => s.status === "calling" ? { status: "active", peerId: s.peerId, peerName: s.peerName, muted: false } : s);
+        const queued = (window as any).__pendingCandidates || [];
+        for (const c of queued) { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {} }
+        (window as any).__pendingCandidates = [];
+      } catch {}
+      setState((s: CallState) => s.status === "calling" ? { status: "active", peerId: s.peerId, peerName: s.peerName, muted: false } : s);
+    }
+    else if (msg.type === "call.ice") {
+      if (pc && pc.remoteDescription) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch {}
+      } else {
+        const arr = (window as any).__pendingCandidates || [];
+        arr.push(msg.candidate);
+        (window as any).__pendingCandidates = arr;
       }
-      else if (msg.type === "call.ice") {
-        const pc = pcRef.current;
-        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
-          try { await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)); } catch {}
-        } else {
-          pendingCandidatesRef.current.push(msg.candidate);
-        }
-      }
-      else if (msg.type === "call.decline") {
-        cleanup();
-        setState({ status: "ended", reason: "Call declined" });
-        setTimeout(() => setState({ status: "idle" }), 2000);
-      }
-      else if (msg.type === "call.end") {
-        cleanup();
-        setState({ status: "ended", reason: "Call ended" });
-        setTimeout(() => setState({ status: "idle" }), 1500);
-      }
-    };
-
-    const ws = wsRef.current;
-    if (!ws) return;
-    const bound = (ev: MessageEvent) => handler(ev);
-    ws.addEventListener("message", bound);
-    return () => ws.removeEventListener("message", bound);
-  }, [wsRef, state.status, cleanup]);
-
-  return { state, startCall, acceptCall, declineCall, endCall, toggleMute };
-}
+    }
+    else if (msg.type === "call.decline") {
+      cleanup();
+      setState({ status: "ended", reason: "Call declined" });
+      setTimeout(() => setState({ status: "idle" }), 2000);
+    }
+    else if (msg.type === "call.end") {
+      cleanup();
+      setState({ status: "ended", reason: "Call ended" });
+      setTimeout(() => setState({ status: "idle" }), 1500);
+    }
+  },
+};
