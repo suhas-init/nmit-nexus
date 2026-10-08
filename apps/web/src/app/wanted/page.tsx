@@ -50,8 +50,21 @@ export default function WantedListPage() {
           <p style={{ fontSize: "0.9rem" }}>What students are looking for right now.</p>
         </div>
         {user && (
-          <button className="btn btn-gold" onClick={() => setShowForm((v) => !v)}>
-            <PlusCircle size={15} /> {showForm ? "Cancel" : "Post what you need"}
+          <button
+            className={`btn ${showForm ? "btn-outline" : "btn-primary"} wanted-cta`}
+            onClick={() => setShowForm((v) => !v)}
+            style={{
+              padding: "0.85rem 1.4rem",
+              fontSize: "0.88rem",
+              fontWeight: 700,
+              letterSpacing: "0.03em",
+              position: "relative",
+              overflow: "hidden",
+              boxShadow: showForm ? "none" : "0 8px 28px -8px rgba(242, 183, 5, 0.5)",
+            }}
+          >
+            <PlusCircle size={17} />
+            {showForm ? "Cancel" : "Post what you need"}
           </button>
         )}
       </div>
