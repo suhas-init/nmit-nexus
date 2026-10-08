@@ -185,8 +185,12 @@ export const callActions = {
     setState({ status: "idle" });
     // Force user-gesture audio unlock — helps mobile Safari/Chrome
     const el = ensureAudioEl();
-    if (el) { try { await el.play().catch(() => {}); } catch {} }
+    if (el) {
+      // Do NOT await — play() can hang indefinitely when autoplay is blocked
+      el.play().catch(() => {});
+    }
 
+    console.log("[webrtc] startCall entry — proceeding");
     try {
       console.log("[webrtc] startCall — setting calling state");
       setState({ status: "calling", peerId, peerName });
@@ -225,7 +229,9 @@ export const callActions = {
 
     // unlock audio element via the Accept click gesture
     const el = ensureAudioEl();
-    if (el) { try { await el.play().catch(() => {}); } catch {} }
+    if (el) {
+      el.play().catch(() => {});
+    }
 
     try {
       stopRingtone();
