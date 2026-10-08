@@ -8,6 +8,7 @@ import { handoversApi, Handover } from "@/lib/handovers";
 import { CheckCircle2, ShieldCheck, KeyRound, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Star, Download } from "lucide-react";
+import { ConfettiBurst } from "@/components/confetti-burst";
 
 export default function HandoverPage() {
   const { offerId } = useParams<{ offerId: string }>();
@@ -55,6 +56,8 @@ export default function HandoverPage() {
       <Link href="/offers" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.9rem", marginBottom: "1rem", color: "var(--text-0)", fontWeight: 600 }}>
         <ArrowLeft size={15} /> Back
       </Link>
+
+      {data.verified && <ConfettiBurst trigger={data.verified} />}
 
       <div className="card" style={{ padding: "2rem", textAlign: "center" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", color: "#1e7a3f", fontWeight: 700, fontSize: "0.85rem" }}>

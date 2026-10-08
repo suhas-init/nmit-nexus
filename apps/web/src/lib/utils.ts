@@ -20,3 +20,8 @@ export function timeAgo(iso: string) {
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   return `${Math.floor(s / 86400)}d ago`;
 }
+
+export function isNew(iso: string, hours = 6) {
+  const age = Date.now() - new Date(iso).getTime();
+  return age < hours * 60 * 60 * 1000;
+}

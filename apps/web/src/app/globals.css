@@ -2329,3 +2329,20 @@ html[data-theme="light"] .call-btn:hover {
   .call-btn { padding: 0.45rem 0.7rem; font-size: 0.65rem; }
   .call-btn span { display: none; }
 }
+
+/* NEW badge — pulse to draw the eye */
+.badge-new {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ADE80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  animation: newPulse 2.5s ease-in-out infinite;
+}
+@keyframes newPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+}
+html[data-theme="light"] .badge-new {
+  background: rgba(21, 128, 61, 0.10);
+  color: #15803D;
+  border-color: rgba(21, 128, 61, 0.3);
+}

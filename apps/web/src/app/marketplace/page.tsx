@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { api, Category, Listing } from "@/lib/api";
-import { formatINR, timeAgo } from "@/lib/utils";
+import { formatINR, timeAgo, isNew } from "@/lib/utils";
 import { Search, PackageOpen } from "lucide-react";
 import { ListingCardCover } from "@/components/listing-card-cover";
 
@@ -119,6 +119,7 @@ function MarketplaceInner() {
                   <ListingCardCover listingId={l.id} title={l.title} />
                   <div style={{ padding: "0.9rem" }}>
                     <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
+                      {isNew(l.created_at) && <span className="badge badge-new">NEW</span>}
                       <span className="badge badge-condition">{l.condition.replace("_", " ")}</span>
                       {l.type === "FREE" && <span className="badge badge-active">FREE</span>}
                       {l.type === "RENT" && <span className="badge badge-violet">RENT</span>}
