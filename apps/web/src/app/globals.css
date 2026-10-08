@@ -2181,3 +2181,87 @@ html[data-theme="light"] .feature-block--ping {
 html[data-theme="light"] .filter-chip--on {
   color: #FFFFFF;
 }
+
+/* ============================================================ */
+/* NAVBAR LINK HOVER — illuminate                                     */
+/* ============================================================ */
+header .nav-link,
+header a.btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.25s ease,
+    transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1),
+    box-shadow 0.25s ease;
+}
+
+/* Subtle lift + amber border on hover */
+header .nav-link:hover,
+header a.btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: rgba(242, 183, 5, 0.06);
+  box-shadow: 0 4px 14px -6px rgba(242, 183, 5, 0.35);
+}
+
+/* Soft amber glow that sweeps in from the left */
+header .nav-link::after,
+header a.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(242, 183, 5, 0.15) 50%, transparent 100%);
+  transform: translateX(-120%);
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1);
+  pointer-events: none;
+}
+
+header .nav-link:hover::after,
+header a.btn:hover::after {
+  transform: translateX(120%);
+}
+
+/* Active link — persistent amber tint (already handled by btn-primary, just polish it) */
+header .nav-link.btn-primary {
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 16px -6px rgba(242, 183, 5, 0.4);
+}
+
+/* Icon nudges right slightly on hover for a lively feel */
+header .nav-link svg,
+header a.btn svg {
+  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+header .nav-link:hover svg,
+header a.btn:hover svg {
+  transform: scale(1.12);
+}
+
+/* Notification bell badge — pulse on hover */
+header a[href="/notifications"]:hover {
+  border-color: var(--red) !important;
+  color: var(--red) !important;
+  background: rgba(248, 113, 113, 0.06) !important;
+  box-shadow: 0 4px 14px -6px rgba(248, 113, 113, 0.4);
+}
+header a[href="/notifications"]:hover::after {
+  background: linear-gradient(120deg, transparent 0%, rgba(248, 113, 113, 0.15) 50%, transparent 100%);
+}
+
+/* Light theme — warm tint */
+html[data-theme="light"] header .nav-link:hover,
+html[data-theme="light"] header a.btn:hover {
+  background: rgba(180, 83, 9, 0.06);
+  box-shadow: 0 4px 14px -6px rgba(180, 83, 9, 0.3);
+}
+
+/* Kill on touch — no hover state to give */
+@media (hover: none) {
+  header .nav-link::after,
+  header a.btn::after { display: none; }
+  header .nav-link:hover,
+  header a.btn:hover { transform: none !important; }
+}
