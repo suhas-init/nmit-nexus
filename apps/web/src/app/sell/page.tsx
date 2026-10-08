@@ -117,9 +117,7 @@ export default function SellPage() {
           }}
         />
 
-        <div className="card sell-book-lookup" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
-          <BookSearch onPick={onBookPick} />
-        </div>
+        <BookSearch onPick={onBookPick} />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>

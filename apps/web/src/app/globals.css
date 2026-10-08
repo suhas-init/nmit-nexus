@@ -1437,32 +1437,269 @@ html[data-theme="light"] .wanted-cta:hover {
   box-shadow: 0 12px 32px -8px rgba(180, 83, 9, 0.5) !important;
 }
 
+
 /* ============================================================ */
-/* SELL PAGE — Auto List + Book Lookup side by side              */
+/* BOOK LOOKUP — posh card                                      */
 /* ============================================================ */
-.sell-helpers {
+.book-lookup {
+  border-radius: 12px;
+  border: 1px solid var(--border-0);
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.04) 0%, transparent 40%),
+    var(--bg-1);
+  padding: 1.1rem 1.15rem 1.15rem;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.25s ease;
+}
+
+.book-lookup::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(14, 165, 233, 0.5) 50%, transparent 100%);
+  opacity: 0.6;
+}
+
+.book-lookup:hover {
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.book-lookup-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.book-lookup-label {
+  color: var(--text-0);
+  font-weight: 600;
+}
+
+.book-lookup-hint {
+  color: var(--text-2);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 0.68rem;
+  margin-left: auto;
+  opacity: 0.75;
+}
+
+.book-lookup-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.book-lookup-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  padding: 0 0.7rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 0;
+}
+
+.book-lookup-input:focus-within {
+  border-color: var(--sky, #0EA5E9);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+}
+
+.book-lookup-input > svg {
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+
+.book-lookup-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-0);
+  font-size: 0.85rem;
+  font-family: inherit;
+  padding: 0.65rem 0;
+  min-width: 0;
+}
+
+.book-lookup-input input::placeholder {
+  color: var(--text-2);
+}
+
+.book-lookup-btn {
+  padding: 0 1rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-1);
+  color: var(--text-0);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.book-lookup-btn:hover:not(:disabled) {
+  border-color: var(--sky, #0EA5E9);
+  color: var(--sky, #0EA5E9);
+  background: rgba(14, 165, 233, 0.06);
+}
+
+.book-lookup-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.book-lookup-results {
+  margin-top: 0.75rem;
+  border: 1px solid var(--border-0);
+  border-radius: 10px;
+  background: var(--bg-1);
+  overflow: hidden;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-lookup-results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-0);
+  background: var(--bg-2);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.book-lookup-results-head button {
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 2px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  align-items: start;
-  margin-bottom: 1rem;
+  place-items: center;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
 }
 
-.sell-helpers > * {
-  margin-bottom: 0 !important;
+.book-lookup-results-head button:hover {
+  color: var(--text-0);
+  background: var(--bg-3);
 }
 
-.sell-book-lookup {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, rgba(96, 165, 250, 0.03) 100%) !important;
-  border-color: rgba(14, 165, 233, 0.25) !important;
+.book-lookup-loading,
+.book-lookup-empty,
+.book-lookup-err {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-2);
 }
 
-@media (max-width: 720px) {
-  .sell-helpers { grid-template-columns: 1fr; }
+.book-lookup-err { color: var(--red); }
+
+.book-lookup-item {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border: none;
+  border-bottom: 1px solid var(--border-0);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.book-lookup-item:last-child { border-bottom: none; }
+.book-lookup-item:hover { background: var(--bg-2); }
+
+.book-lookup-cover {
+  width: 40px;
+  height: 56px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border-0);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.book-lookup-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-lookup-meta { min-width: 0; flex: 1; }
+
+.book-lookup-title {
+  font-weight: 600;
+  color: var(--text-0);
+  font-size: 0.85rem;
+  margin-bottom: 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.35;
+}
+
+.book-lookup-author {
+  font-size: 0.75rem;
+  color: var(--text-1);
+  margin-bottom: 0.1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-lookup-pub {
+  font-size: 0.68rem;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Light theme */
-html[data-theme="light"] .sell-book-lookup {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(96, 165, 250, 0.02) 100%) !important;
-  border-color: rgba(14, 165, 233, 0.28) !important;
+html[data-theme="light"] .book-lookup {
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.06) 0%, transparent 45%),
+    var(--bg-1);
+}
+html[data-theme="light"] .book-lookup::before {
+  background: linear-gradient(90deg, transparent 0%, rgba(14, 165, 233, 0.4) 50%, transparent 100%);
+}
+html[data-theme="light"] .book-lookup-input {
+  background: #FFFFFF;
+}
+html[data-theme="light"] .book-lookup-item:hover {
+  background: var(--bg-2);
 }

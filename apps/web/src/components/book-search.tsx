@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Search, Loader2, BookOpen } from "lucide-react";
+import { Search, Loader2, BookOpen, X } from "lucide-react";
 import { api } from "@/lib/api";
 
 export type BookHit = {
@@ -37,54 +37,70 @@ export function BookSearch({ onPick }: { onPick: (b: BookHit) => void }) {
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      <label className="term-label" style={{ display: "block", marginBottom: "0.6rem" }}>
-        BOOK_LOOKUP · autofill from Open Library
-      </label>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <div style={{ position: "relative", flex: 1 }}>
-          <Search size={14} style={{ position: "absolute", left: 10, top: 13, color: "var(--text-2)" }} />
+    <div className="book-lookup">
+      <div className="book-lookup-head">
+        <BookOpen size={14} style={{ color: "var(--sky, #0EA5E9)" }} />
+        <span className="book-lookup-label">Book Lookup</span>
+        <span className="book-lookup-hint">auto-fill a textbook listing</span>
+      </div>
+
+      <div className="book-lookup-row">
+        <div className="book-lookup-input">
+          <Search size={14} />
           <input
-            className="input"
-            style={{ paddingLeft: 32 }}
-            placeholder="Engineering Mathematics, Casio manual…"
+            placeholder="Engineering Mathematics, CLRS…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); run(); } }}
           />
         </div>
-        <button type="button" className="btn btn-outline" onClick={run} disabled={loading}>
+        <button type="button" className="book-lookup-btn" onClick={run} disabled={loading}>
           {loading ? <Loader2 size={14} className="spin" /> : "Search"}
         </button>
       </div>
 
       {open && (
-        <div className="card" style={{ marginTop: "0.75rem", maxHeight: 340, overflowY: "auto" }}>
-          {loading && <div style={{ padding: "1rem", textAlign: "center", color: "var(--text-2)", fontFamily: "var(--font-mono)", fontSize: "0.82rem" }}>searching…</div>}
-          {err && <div style={{ padding: "1rem", color: "var(--red)", fontSize: "0.85rem" }}>{err}</div>}
-          {!loading && !err && hits.length === 0 && (
-            <div style={{ padding: "1rem", textAlign: "center", color: "var(--text-2)", fontSize: "0.85rem" }}>No books matched.</div>
+        <div className="book-lookup-results">
+          <div className="book-lookup-results-head">
+            <span>{loading ? "searching…" : `${hits.length} result${hits.length === 1 ? "" : "s"}`}</span>
+            <button type="button" onClick={() => { setOpen(false); setHits([]); }} aria-label="Close results">
+              <X size={12} />
+            </button>
+          </div>
+
+          {loading && (
+            <div className="book-lookup-loading">
+              <Loader2 size={16} className="spin" />
+            </div>
           )}
+
+          {!loading && err && <div className="book-lookup-err">{err}</div>}
+
+          {!loading && !err && hits.length === 0 && (
+            <div className="book-lookup-empty">No books matched that title.</div>
+          )}
+
           {!loading && hits.map((b) => (
             <button
               key={b.id}
               type="button"
+              className="book-lookup-item"
               onClick={() => { onPick(b); setOpen(false); setQ(b.title); }}
-              style={{
-                display: "flex", gap: "0.75rem", width: "100%", textAlign: "left",
-                padding: "0.75rem", border: "none", borderBottom: "1px solid var(--border-0)",
-                background: "var(--bg-2)", cursor: "pointer", transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-3)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-2)")}
             >
-              <div className="thumb" style={{ width: 44, height: 60, borderRadius: 6, flexShrink: 0, fontSize: "0.9rem" }}>
-                {b.thumbnail ? <img src={b.thumbnail} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <BookOpen size={16} />}
+              <div className="book-lookup-cover">
+                {b.thumbnail ? (
+                  <img src={b.thumbnail} alt="" />
+                ) : (
+                  <BookOpen size={14} style={{ color: "var(--text-2)" }} />
+                )}
               </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.9rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.title}</div>
-                <div style={{ fontSize: "0.78rem", color: "var(--text-1)", marginBottom: "0.15rem" }}>{b.authors.join(", ") || "Unknown author"}{b.publishedDate ? ` · ${b.publishedDate}` : ""}</div>
-                {b.publisher && <div style={{ fontSize: "0.72rem", color: "var(--text-2)" }}>{b.publisher}</div>}
+              <div className="book-lookup-meta">
+                <div className="book-lookup-title">{b.title}</div>
+                <div className="book-lookup-author">
+                  {b.authors.slice(0, 2).join(", ") || "Unknown author"}
+                  {b.publishedDate ? ` · ${b.publishedDate}` : ""}
+                </div>
+                {b.publisher && <div className="book-lookup-pub">{b.publisher}</div>}
               </div>
             </button>
           ))}
