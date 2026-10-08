@@ -45,12 +45,34 @@ export default function ConversationPage() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
   const send = async () => {
-    if (!text.trim() || !accessToken) return;
+    const body = text.trim();
+    if (!body || !accessToken || !user) return;
     setSending(true);
+    setText("");
+
+    // Optimistic — show the message instantly with a temp ID
+    const tempId = `temp-${Date.now()}`;
+    const optimistic = {
+      id: tempId,
+      conversation_id: id,
+      sender_id: user.id,
+      message_type: "TEXT",
+      body,
+      created_at: new Date().toISOString(),
+    };
+    qc.setQueryData<any[]>(["messages", id], (old) => [...(old || []), optimistic]);
+
     try {
-      await offersApi.send(id, text.trim(), accessToken);
-      setText("");
-      qc.invalidateQueries({ queryKey: ["messages", id] });
+      const real = await offersApi.send(id, body, accessToken);
+      // Replace optimistic with the real server message
+      qc.setQueryData<any[]>(["messages", id], (old) => {
+        if (!old) return [real];
+        return old.map((m) => (m.id === tempId ? real : m));
+      });
+    } catch {
+      // Roll back on failure
+      qc.setQueryData<any[]>(["messages", id], (old) => (old || []).filter((m) => m.id !== tempId));
+      setText(body);
     } finally { setSending(false); }
   };
 
