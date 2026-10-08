@@ -1184,3 +1184,110 @@ button:focus:not(:focus-visible) { outline: none; }
 @media (min-width: 1920px) {
   html { font-size: 17px; }
 }
+
+/* ============================================================ */
+/* HOMEPAGE FEATURE BLOCK HOVER                                */
+/* ============================================================ */
+.feature-block {
+  position: relative;
+  cursor: pointer;
+  transition:
+    background 0.35s cubic-bezier(0.2, 0.9, 0.3, 1),
+    transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Gold corner accent that slides in from the left */
+.feature-block::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+/* Soft amber radial glow that tracks cursor */
+.feature-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    320px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(242, 183, 5, 0.09),
+    transparent 55%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.feature-block:hover {
+  background: var(--bg-2);
+  transform: translateY(-2px);
+}
+
+.feature-block:hover::before {
+  transform: scaleY(1);
+}
+
+.feature-block:hover::after {
+  opacity: 1;
+}
+
+/* Number label slide + accent on hover */
+.feature-block .feature-num {
+  color: var(--text-2);
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  font-family: var(--font-mono), monospace;
+}
+
+.feature-block:hover .feature-num {
+  color: var(--accent);
+  transform: translateX(4px);
+}
+
+/* Title slides right slightly + brightens */
+.feature-block .feature-title {
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.feature-block:hover .feature-title {
+  color: var(--accent);
+  transform: translateX(4px);
+}
+
+/* Description softens + slides */
+.feature-block > div:last-child {
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.3s ease;
+}
+
+.feature-block:hover > div:last-child {
+  transform: translateX(4px);
+  opacity: 0.95;
+}
+
+/* Kill on touch — the effects need a cursor */
+@media (hover: none) {
+  .feature-block::before,
+  .feature-block::after { display: none !important; }
+  .feature-block:hover { transform: none !important; background: var(--bg-1) !important; }
+  .feature-block:hover .feature-num,
+  .feature-block:hover .feature-title,
+  .feature-block:hover > div:last-child { transform: none !important; color: inherit !important; }
+}
+
+/* Light mode tint */
+html[data-theme="light"] .feature-block::after {
+  background: radial-gradient(
+    320px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(180, 83, 9, 0.10),
+    transparent 55%
+  );
+}
+html[data-theme="light"] .feature-block:hover { background: var(--bg-2); }
+html[data-theme="light"] .feature-block::before { background: var(--accent); }

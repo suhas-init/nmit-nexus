@@ -161,7 +161,7 @@ export default function Home() {
           {FEATURES.map((f, i) => (
             <div
               key={i}
-              className="reveal lift"
+              className="reveal feature-block"
               style={{
                 padding: "1.75rem 1.5rem",
                 borderRight: (i + 1) % 3 === 0 ? "none" : "1px solid var(--border-0)",
@@ -170,10 +170,10 @@ export default function Home() {
                 background: "var(--bg-1)",
               }}
             >
-              <div className="mono" style={{ fontSize: "0.62rem", color: "var(--text-2)", letterSpacing: "0.14em", marginBottom: "1rem", textTransform: "uppercase" }}>
+              <div className="feature-num" style={{ fontSize: "0.62rem", letterSpacing: "0.14em", marginBottom: "1rem", textTransform: "uppercase" }}>
                 {String(i + 1).padStart(2, "0")} · {f.tag}
               </div>
-              <div style={{ fontSize: "1rem", fontWeight: 500, color: "var(--text-0)", marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
+              <div className="feature-title" style={{ fontSize: "1rem", fontWeight: 500, color: "var(--text-0)", marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
                 {f.title}
               </div>
               <div style={{ fontSize: "0.86rem", color: "var(--text-1)", lineHeight: 1.6 }}>
