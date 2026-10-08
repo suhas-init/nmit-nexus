@@ -118,10 +118,6 @@ export default function SellPage() {
         <BookSearch onPick={onBookPick} />
       </div>
 
-      <div className="card" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
-        <ImageUploader urls={imageUrls} onChange={setImageUrls} max={5} />
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div>
           <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Title</label>

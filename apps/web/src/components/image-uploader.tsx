@@ -2,8 +2,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 
-const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD;
-const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET;
+const CLOUD = "wq0up9xg";
+const PRESET = "nmit_unsigned";
 
 export function ImageUploader({
   urls,
