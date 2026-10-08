@@ -55,7 +55,7 @@ export default function VerifyPage() {
           Check your inbox
         </h1>
         <p style={{ fontSize: "0.9rem", color: "var(--text-1)", marginBottom: "1.75rem", lineHeight: 1.6 }}>
-          We sent a 6-digit code to <strong style={{ color: "var(--text-0)" }}>{user.email}</strong>.
+          We sent a 6-digit code to <strong style={{ color: "var(--text-0)" }}>{user.email}</strong>.<br/><span style={{ fontSize: "0.82rem", color: "var(--text-2)" }}>Don't see it? Check your <strong style={{ color: "var(--accent)" }}>Spam</strong> or <strong style={{ color: "var(--accent)" }}>Promotions</strong> folder.</span>
         </p>
 
         {err && <div className="mono" style={{ padding: "0.6rem 0.85rem", background: "rgba(248,113,113,0.08)", color: "var(--red)", borderRadius: 6, fontSize: "0.78rem", marginBottom: "1rem", border: "1px solid rgba(248,113,113,0.2)" }}>{err}</div>}

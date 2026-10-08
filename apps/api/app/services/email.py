@@ -1,13 +1,12 @@
-import resend
+from mailjet_rest import Client
 from app.core.config import settings
-
-if settings.RESEND_API_KEY:
-    resend.api_key = settings.RESEND_API_KEY
 
 
 def send_verification_code(to_email: str, code: str, name: str) -> bool:
-    if not settings.RESEND_API_KEY:
+    if not settings.MAILJET_API_KEY or not settings.MAILJET_SECRET_KEY or not settings.MAILJET_FROM:
+        print("mailjet not configured")
         return False
+
     html = f"""
     <div style="background:#0A0E14;color:#F5F7FA;font-family:'Helvetica Neue',sans-serif;padding:40px 24px;border-radius:12px;max-width:520px;margin:auto;">
       <div style="font-size:22px;font-weight:800;color:#F2B705;letter-spacing:-0.5px;">NMIT NEXUS</div>
@@ -29,14 +28,24 @@ def send_verification_code(to_email: str, code: str, name: str) -> bool:
       <p style="font-size:10px;color:#52525B;">NMIT Nexus — Student project. Not officially affiliated with Nitte Meenakshi Institute of Technology.</p>
     </div>
     """
+
     try:
-        resend.Emails.send({
-            "from": settings.RESEND_FROM,
-            "to": to_email,
-            "subject": f"Your NMIT Nexus verification code: {code}",
-            "html": html,
-        })
-        return True
+        client = Client(auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY), version="v3.1")
+        payload = {
+            "Messages": [
+                {
+                    "From": {"Email": settings.MAILJET_FROM, "Name": "NMIT Nexus"},
+                    "To": [{"Email": to_email, "Name": name}],
+                    "Subject": f"Your NMIT Nexus verification code: {code}",
+                    "HTMLPart": html,
+                }
+            ]
+        }
+        result = client.send.create(data=payload)
+        if result.status_code in (200, 201):
+            return True
+        print(f"mailjet send failed: {result.status_code} {result.json()}")
+        return False
     except Exception as e:
         print(f"email send failed: {e}")
         return False
