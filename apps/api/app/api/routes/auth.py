@@ -49,6 +49,8 @@ def _hash_code(code: str) -> str:
 
 @router.post("/register", response_model=TokenOut, status_code=201)
 async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
+    if not body.email.lower().endswith("@gmail.com"):
+        raise HTTPException(status_code=422, detail="Email must be a Gmail address")
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(status_code=409, detail="email already registered")
@@ -136,10 +138,6 @@ async def verify_email(
     user.email_verified = True
     user.verification_code_hash = None
     user.verification_expires_at = None
-    # bonus: campus email => verified badge
-    if user.email.endswith("@nmit.ac.in"):
-        user.campus_verified = True
-
     await db.commit()
     return {"ok": True, "campus_verified": user.campus_verified}
 

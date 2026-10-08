@@ -44,7 +44,7 @@ export default function SellPage() {
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { condition: "GOOD", type: "SELL", price: 0 },
+    defaultValues: { condition: "GOOD", type: "SELL" },
   });
 
   const onBookPick = (b: BookHit) => {

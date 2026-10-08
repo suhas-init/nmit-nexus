@@ -10,7 +10,7 @@ import { useAuth } from "@/store/auth";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(120),
-  email: z.string().email("Enter a valid email"),
+  email: z.string().email("Enter a valid email").refine((v) => v.toLowerCase().endsWith("@gmail.com"), "Only Gmail addresses are accepted"),
   password: z.string().min(8, "At least 8 characters"),
   department: z.string().max(60).optional(),
 });
@@ -44,7 +44,7 @@ export default function RegisterPage() {
     <div style={{ maxWidth: 460, margin: "3rem auto" }}>
       <div className="card" style={{ padding: "2rem" }}>
         <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--text-0)", marginBottom: "0.35rem" }}>Create your account</h1>
-        <p style={{ fontSize: "0.9rem", marginBottom: "1.5rem" }}>Use your <strong>@nmit.ac.in</strong> email to get the verified badge.</p>
+        <p style={{ fontSize: "0.9rem", marginBottom: "1.5rem" }}>Sign up with your Gmail. We'll send a 6-digit code to verify.</p>
 
         {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
 
@@ -56,7 +56,7 @@ export default function RegisterPage() {
           </div>
           <div>
             <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-0)", display: "block", marginBottom: "0.35rem" }}>Campus email</label>
-            <input className="input" type="email" placeholder="you@nmit.ac.in" {...register("email")} />
+            <input className="input" type="email" placeholder="you@gmail.com" {...register("email")} />
             {errors.email && <p style={{ color: "#b42318", fontSize: "0.78rem", marginTop: "0.25rem" }}>{errors.email.message}</p>}
           </div>
           <div>
