@@ -21,13 +21,17 @@ export const useAuth = create<AuthState>()(
       user: null,
       setTokens: (access, refresh) => set({ accessToken: access, refreshToken: refresh }),
       setUser: (user) => set({ user }),
-      logout: () => set({ accessToken: null, refreshToken: null, user: null }),
+      logout: () => { try { sessionStorage.removeItem("nexus-verified-flag"); } catch {} set({ accessToken: null, refreshToken: null, user: null }); },
       fetchMe: async () => {
         const token = get().accessToken;
         if (!token) { set({ user: null }); return; }
         try {
           const me = await api.get<User>("/auth/me", token);
           set({ user: me });
+          try {
+            if (me.email_verified) sessionStorage.setItem("nexus-verified-flag", "1");
+            else sessionStorage.removeItem("nexus-verified-flag");
+          } catch {}
         } catch (e: any) {
           if (e?.status === 401) {
             set({ accessToken: null, refreshToken: null, user: null });

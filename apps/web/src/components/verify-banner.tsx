@@ -20,8 +20,12 @@ export function VerifyBanner() {
 
   // Not logged in → hide
   if (!user) return null;
+  // Hard flag: we've confirmed verified in this session — always hide
+  try { if (sessionStorage.getItem("nexus-verified-flag") === "1") return null; } catch {}
   // Verified → hide
   if (user.email_verified === true) return null;
+  // Explicitly false → only case we show
+  if (user.email_verified !== false) return null;
   // Dismissed → hide
   if (dismissed) return null;
 

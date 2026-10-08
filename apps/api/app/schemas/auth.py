@@ -1,10 +1,27 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class RegisterIn(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     department: str | None = Field(default=None, max_length=60)
+
+    @field_validator("password")
+    @classmethod
+    def strong_password(cls, v: str) -> str:
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one number")
+        if not any(c.isalpha() for c in v):
+            raise ValueError("Password must contain at least one letter")
+        return v
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 2:
+            raise ValueError("Name too short")
+        return v
 
 class LoginIn(BaseModel):
     email: EmailStr

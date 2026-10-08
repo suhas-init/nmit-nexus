@@ -20,6 +20,21 @@ from app.models.user import User
 from app.schemas.auth import LoginIn, RefreshIn, RegisterIn, TokenOut, UserOut
 from app.services.email import send_verification_code
 
+
+import time as _time
+_rate_buckets: dict[str, list[float]] = {}
+
+def _rate_limit(key: str, max_calls: int, window_sec: int) -> bool:
+    """Returns True if allowed, False if rate-limited."""
+    now = _time.time()
+    bucket = _rate_buckets.setdefault(key, [])
+    bucket[:] = [t for t in bucket if now - t < window_sec]
+    if len(bucket) >= max_calls:
+        return False
+    bucket.append(now)
+    return True
+
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -49,6 +64,8 @@ def _hash_code(code: str) -> str:
 
 @router.post("/register", response_model=TokenOut, status_code=201)
 async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
+    if not _rate_limit(f"reg:{body.email.lower()}", 3, 3600):
+        raise HTTPException(status_code=429, detail="Too many attempts. Try again later.")
     if not body.email.lower().endswith("@gmail.com"):
         raise HTTPException(status_code=422, detail="Email must be a Gmail address")
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
@@ -80,6 +97,8 @@ async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login", response_model=TokenOut)
 async def login(body: LoginIn, db: AsyncSession = Depends(get_db)):
+    if not _rate_limit(f"login:{body.email.lower()}", 10, 900):
+        raise HTTPException(status_code=429, detail="Too many attempts. Try again in a few minutes.")
     result = await db.execute(select(User).where(User.email == body.email.lower()))
     user = result.scalar_one_or_none()
     if user is None or not verify_password(body.password, user.password_hash):
@@ -174,6 +193,8 @@ async def resend_code(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if not _rate_limit(f"resend:{user.email}", 3, 900):
+        raise HTTPException(status_code=429, detail="Too many attempts. Try again later.")
     if user.email_verified:
         return {"ok": True, "already": True}
 
