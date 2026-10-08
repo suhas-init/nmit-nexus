@@ -36,7 +36,7 @@ export const useAuth = create<AuthState>()(
       },
     }),
     {
-      name: "nexus-auth",
+      name: "nexus-auth-v2",
       // ONLY persist tokens. user is always fetched fresh from the server.
       partialize: (state) => ({
         accessToken: state.accessToken,
