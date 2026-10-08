@@ -28,8 +28,11 @@ export const useAuth = create<AuthState>()(
         try {
           const me = await api.get<User>("/auth/me", token);
           set({ user: me });
-        } catch {
-          set({ accessToken: null, refreshToken: null, user: null });
+        } catch (e: any) {
+          // Only log out on 401 (auth actually invalid) — not on transient 5xx
+          if (e?.status === 401) {
+            set({ accessToken: null, refreshToken: null, user: null });
+          }
         }
       },
     }),

@@ -25,7 +25,10 @@ export function Navbar() {
   const { user, accessToken, fetchMe, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => { if (accessToken && !user) fetchMe(); }, [accessToken, user, fetchMe]);
+  // Always refresh user data on mount — persisted state can be stale
+  useEffect(() => {
+    if (accessToken) fetchMe();
+  }, [accessToken, fetchMe]);
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   return (

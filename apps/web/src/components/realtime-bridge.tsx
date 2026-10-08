@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRealtime, WsEvent, sharedWsRef } from "@/lib/ws";
 import { useToasts } from "@/store/toasts";
@@ -8,7 +9,11 @@ import { callActions } from "@/lib/webrtc";
 export function RealtimeBridge() {
   const qc = useQueryClient();
   const push = useToasts((s) => s.push);
-  const { user } = useAuth();
+  const { user, accessToken, fetchMe } = useAuth();
+
+  useEffect(() => {
+    if (accessToken) fetchMe();
+  }, [accessToken, fetchMe]);
 
   useRealtime((e: WsEvent) => {
     if (!user) return;

@@ -18,7 +18,17 @@ export function VerifyBanner() {
     sessionStorage.setItem("verify-banner-dismissed", "1");
   };
 
-  if (!user || user.email_verified || dismissed) return null;
+  // No user → hide
+  if (!user) return null;
+
+  // Already verified → hide (this is the key check)
+  if (user.email_verified === true) return null;
+
+  // Field missing entirely → assume verified for safety (better to hide than nag)
+  if (user.email_verified === undefined) return null;
+
+  // Dismissed this session → hide
+  if (dismissed) return null;
 
   return (
     <div style={{
