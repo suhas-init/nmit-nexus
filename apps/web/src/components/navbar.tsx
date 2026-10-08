@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/store/auth";
+import { useAuth, fullLogout } from "@/store/auth";
 import { Home, Package, PlusCircle, Inbox, MessageSquare, Megaphone, Sparkles, Heart, LayoutDashboard, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotifBell } from "./notif-bell";
@@ -59,7 +59,7 @@ export function Navbar() {
                 <UserIcon size={13} /> <span className="hide-xs">{user.name.split(" ")[0]}</span>
               </Link>
               <NotifBell />
-              <button onClick={logout} className="btn btn-outline" style={{ padding: "0.35rem 0.6rem", fontSize: "0.72rem" }}>
+              <button onClick={fullLogout} className="btn btn-outline" style={{ padding: "0.35rem 0.6rem", fontSize: "0.72rem" }}>
                 <LogOut size={13} />
               </button>
             </>

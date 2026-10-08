@@ -5,7 +5,7 @@ import { AlertTriangle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function VerifyBanner() {
-  const { user } = useAuth();
+  const { user, userSynced } = useAuth();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -20,13 +20,10 @@ export function VerifyBanner() {
 
   // No user → hide
   if (!user) return null;
-
-  // Already verified → hide (this is the key check)
+  // User data not yet refreshed from server → hide (avoid stale flash)
+  if (!userSynced) return null;
+  // Verified → hide
   if (user.email_verified === true) return null;
-
-  // Field missing entirely → assume verified for safety (better to hide than nag)
-  if (user.email_verified === undefined) return null;
-
   // Dismissed this session → hide
   if (dismissed) return null;
 

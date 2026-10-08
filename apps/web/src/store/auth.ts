@@ -7,6 +7,7 @@ type AuthState = {
   accessToken: string | null;
   refreshToken: string | null;
   user: User | null;
+  userSynced: boolean;
   setTokens: (access: string, refresh: string) => void;
   setUser: (user: User | null) => void;
   logout: () => void;
@@ -19,19 +20,22 @@ export const useAuth = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       user: null,
+      userSynced: false,
       setTokens: (access, refresh) => set({ accessToken: access, refreshToken: refresh }),
       setUser: (user) => set({ user }),
-      logout: () => set({ accessToken: null, refreshToken: null, user: null }),
+      logout: () => set({ accessToken: null, refreshToken: null, user: null, userSynced: false }),
       fetchMe: async () => {
         const token = get().accessToken;
         if (!token) return;
         try {
           const me = await api.get<User>("/auth/me", token);
-          set({ user: me });
+          set({ user: me, userSynced: true });
         } catch (e: any) {
           // Only log out on 401 (auth actually invalid) — not on transient 5xx
           if (e?.status === 401) {
-            set({ accessToken: null, refreshToken: null, user: null });
+            set({ accessToken: null, refreshToken: null, user: null, userSynced: false });
+          } else {
+            set({ userSynced: true });
           }
         }
       },
@@ -41,6 +45,11 @@ export const useAuth = create<AuthState>()(
 );
 
 // Wire refresh handler once — updates both tokens when api client silently refreshes
+export function fullLogout() {
+  useAuth.getState().logout();
+  try { localStorage.removeItem("nexus-auth"); } catch {}
+}
+
 setTokenRefreshHandler(({ access, refresh }) => {
   useAuth.setState({ accessToken: access, refreshToken: refresh });
 });
