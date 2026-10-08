@@ -77,11 +77,9 @@ export default function ConversationPage() {
               {myConv.with_user.name}
               {myConv.with_user.campus_verified && <BadgeCheck size={13} style={{ color: "var(--accent)" }} />}
             </div>
-            {myConv.listing_title && (
-              <Link href={`/listing/${myConv.listing_id}`} className="mono" style={{ fontSize: "0.72rem", color: "var(--text-2)", textDecoration: "none" }}>
-                re: {myConv.listing_title}
-              </Link>
-            )}
+            <Link href={`/listing/${myConv.listing_id}`} className="mono" style={{ fontSize: "0.7rem", color: "var(--text-2)", textDecoration: "none" }}>
+              re: {myConv.listing_title || "listing"}
+            </Link>
           </div>
         </div>
       )}

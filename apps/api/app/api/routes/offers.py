@@ -157,10 +157,18 @@ async def list_conversations_enriched(
         other = ures.scalar_one_or_none()
         lres = await db.execute(select(Listing).where(Listing.id == c.listing_id))
         listing = lres.scalar_one_or_none()
+        mres = await db.execute(
+            select(Message).where(Message.conversation_id == c.id)
+            .order_by(Message.created_at.desc()).limit(1)
+        )
+        latest = mres.scalar_one_or_none()
         out.append({
             "id": str(c.id),
             "listing_id": str(c.listing_id),
             "listing_title": listing.title if listing else None,
+            "latest_message": latest.body if latest else None,
+            "latest_message_type": latest.message_type if latest else None,
+            "latest_sender_id": str(latest.sender_id) if latest else None,
             "buyer_id": str(c.buyer_id),
             "seller_id": str(c.seller_id),
             "last_message_at": c.last_message_at.isoformat(),

@@ -15,6 +15,9 @@ type EnrichedConv = {
   last_message_at: string;
   with_user: { id: string | null; name: string; avatar_url: string | null; campus_verified: boolean };
   i_am_buyer: boolean;
+  latest_message?: string | null;
+  latest_message_type?: string | null;
+  latest_sender_id?: string | null;
 };
 
 export default function ConversationsPage() {
@@ -66,8 +69,9 @@ export default function ConversationsPage() {
                 </span>
                 {c.with_user.campus_verified && <BadgeCheck size={12} style={{ color: "var(--accent)" }} />}
               </div>
-              <div className="mono" style={{ fontSize: "0.72rem", color: "var(--text-2)", marginTop: "0.15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {c.listing_title ? `re: ${c.listing_title}` : "conversation"}
+              <div style={{ fontSize: "0.78rem", color: "var(--text-1)", marginTop: "0.15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {c.latest_sender_id === user.id && <span style={{ color: "var(--text-2)" }}>You: </span>}
+                {c.latest_message || (c.listing_title ? `re: ${c.listing_title}` : "conversation")}
               </div>
             </div>
             <div className="mono" style={{ fontSize: "0.68rem", color: "var(--text-2)", flexShrink: 0 }}>
