@@ -47,17 +47,11 @@ export function AiDraft({
   };
 
   return (
-    <div className="card spotlight" style={{
-      padding: "1.25rem",
-      marginBottom: "1rem",
-      background: "linear-gradient(135deg, rgba(139,92,246,0.10) 0%, rgba(34,211,238,0.06) 100%)",
-      borderColor: "rgba(139,92,246,0.30)",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem", fontWeight: 700, color: "var(--violet)", fontSize: "0.85rem", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
-        <Sparkles size={15} /> AUTO_LIST
-      </div>
-      <div style={{ fontSize: "0.82rem", color: "var(--text-1)", marginBottom: "0.75rem" }}>
-        Type rough words. Get a clean listing draft — title, description, price range, category.
+    <div className="ai-draft">
+      <div className="ai-draft-head">
+        <Sparkles size={14} style={{ color: "var(--violet, #8B5CF6)" }} />
+        <span className="ai-draft-label">AI Draft</span>
+        <span className="ai-draft-hint">write a listing from rough words</span>
       </div>
       <textarea
         className="textarea"
