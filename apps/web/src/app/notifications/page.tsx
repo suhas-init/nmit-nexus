@@ -47,11 +47,11 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {isLoading && <div className="card" style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>Loading…</div>}
+      {isLoading && <div className="card" style={{ padding: "2rem", textAlign: "center", color: "var(--text-2)" }}>Loading…</div>}
 
       {!isLoading && (!data || data.length === 0) && (
         <div className="card" style={{ padding: "3rem 1.5rem", textAlign: "center" }}>
-          <Bell size={40} style={{ color: "#94a3b8", margin: "0 auto 0.75rem" }} />
+          <Bell size={40} style={{ color: "var(--text-2)", margin: "0 auto 0.75rem" }} />
           <div style={{ fontWeight: 700, color: "var(--text-0)", marginBottom: "0.35rem" }}>You're all caught up.</div>
           <div style={{ fontSize: "0.9rem" }}>New offers, messages, and handovers will show up here.</div>
         </div>
@@ -63,13 +63,13 @@ export default function NotificationsPage() {
         const href = p.href as string | undefined;
         const content = (
           <div style={{
-            background: unread ? "#eef4ff" : "white",
+            background: unread ? "var(--bg-2)" : "var(--bg-1)",
             borderLeft: unread ? "3px solid var(--text-0)" : "3px solid transparent",
           }}>
             <div style={{ padding: "0.9rem 1.15rem" }}>
               <div style={{ fontWeight: 700, color: "var(--text-0)", fontSize: "0.95rem" }}>{p.title || n.type}</div>
-              {p.body && <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.2rem" }}>{p.body}</div>}
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.4rem" }}>{timeAgo(n.created_at)}</div>
+              {p.body && <div style={{ fontSize: "0.85rem", color: "var(--text-1)", marginTop: "0.2rem" }}>{p.body}</div>}
+              <div style={{ fontSize: "0.75rem", color: "var(--text-2)", marginTop: "0.4rem" }}>{timeAgo(n.created_at)}</div>
             </div>
           </div>
         );
