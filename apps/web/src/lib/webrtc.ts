@@ -184,11 +184,9 @@ export const callActions = {
       setTimeout(() => setState({ status: "idle" }), 2000);
       return;
     }
-    const cur = useCallStore.getState().state;
-    if (cur.status !== "idle") return;
-
-    // Ensure clean slate from any previous call
+    // Always force a clean slate
     cleanup();
+    setState({ status: "idle" });
     // Force user-gesture audio unlock — helps mobile Safari/Chrome
     const el = ensureAudioEl();
     if (el) { try { await el.play().catch(() => {}); } catch {} }
@@ -276,6 +274,12 @@ export const callActions = {
     const cur = useCallStore.getState().state;
 
     if (msg.type === "call.offer") {
+      console.log("[webrtc] got offer from", msg.from, "current:", cur.status, "pendingOffer:", !!pendingOffer);
+      // Ignore duplicate offer (same peer, already pending)
+      if (cur.status === "incoming" && cur.peerId === msg.from && pendingOffer) {
+        console.log("[webrtc] duplicate offer ignored");
+        return;
+      }
       if (cur.status !== "idle") {
         ws.send(JSON.stringify({ type: "call.decline", to: msg.from }));
         return;
