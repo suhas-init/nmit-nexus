@@ -134,12 +134,6 @@ async def create_bid(
     db.add(b)
     await db.commit()
     await db.refresh(b)
-    await manager.send_to_user(str(w.buyer_id), {
-        "type": "wanted.bid.created",
-        "wanted_post_id": str(w.id),
-        "title": w.title,
-        "bid_price": float(b.bid_price),
-    })
     await notify(db, str(w.buyer_id), "wanted.bid.created", {
         "title": f"New bid on your wanted post",
         "body": f"{w.title} — ₹{float(b.bid_price):.0f}",

@@ -164,9 +164,6 @@ async def confirm_handover(
     lres = await db.execute(select(Listing).where(Listing.id == offer.listing_id))
     listing = lres.scalar_one_or_none()
     if h.verified_at is not None:
-        payload = {"type": "handover.verified", "offer_id": str(offer.id)}
-        await manager.send_to_user(str(offer.seller_id), payload)
-        await manager.send_to_user(str(offer.buyer_id), payload)
         for uid in {offer.seller_id, offer.buyer_id}:
             await notify(db, str(uid), "handover.verified", {
                 "title": "Handover verified ✓",

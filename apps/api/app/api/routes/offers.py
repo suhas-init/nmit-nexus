@@ -77,14 +77,6 @@ async def create_offer(
     db.add(msg)
     await db.commit()
     await db.refresh(offer)
-    await manager.send_to_user(str(listing.seller_id), {
-        "type": "offer.created",
-        "offer_id": str(offer.id),
-        "listing_id": str(listing.id),
-        "listing_title": listing.title,
-        "offer_price": float(offer.offer_price),
-        "buyer_id": str(user.id),
-    })
     await notify(db, str(listing.seller_id), "offer.created", {
         "title": f"New offer on {listing.title}",
         "body": f"₹{float(offer.offer_price):.0f}",
@@ -147,6 +139,42 @@ async def update_offer(
     return _offer_out(offer)
 
 
+@router.get("/conversations/enriched")
+async def list_conversations_enriched(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    res = await db.execute(
+        select(Conversation).where(
+            or_(Conversation.buyer_id == user.id, Conversation.seller_id == user.id)
+        ).order_by(Conversation.last_message_at.desc())
+    )
+    convs = res.scalars().all()
+    out = []
+    for c in convs:
+        other_id = c.seller_id if c.buyer_id == user.id else c.buyer_id
+        ures = await db.execute(select(User).where(User.id == other_id))
+        other = ures.scalar_one_or_none()
+        lres = await db.execute(select(Listing).where(Listing.id == c.listing_id))
+        listing = lres.scalar_one_or_none()
+        out.append({
+            "id": str(c.id),
+            "listing_id": str(c.listing_id),
+            "listing_title": listing.title if listing else None,
+            "buyer_id": str(c.buyer_id),
+            "seller_id": str(c.seller_id),
+            "last_message_at": c.last_message_at.isoformat(),
+            "with_user": {
+                "id": str(other.id) if other else None,
+                "name": other.name if other else "Unknown",
+                "avatar_url": other.avatar_url if other else None,
+                "campus_verified": other.campus_verified if other else False,
+            },
+            "i_am_buyer": c.buyer_id == user.id,
+        })
+    return out
+
+
 @router.get("/conversations", response_model=list[ConversationOut])
 async def list_conversations(
     user: User = Depends(get_current_user),
@@ -198,10 +226,6 @@ async def send_message(
     await db.commit()
     await db.refresh(msg)
     recipient = conv.seller_id if user.id == conv.buyer_id else conv.buyer_id
-    await manager.send_to_user(str(recipient), {
-        "type": "message.created",
-        "conversation_id": str(conversation_id),
-    })
     await notify(db, str(recipient), "message.created", {
         "title": "New message",
         "href": f"/conversations/{conversation_id}",
