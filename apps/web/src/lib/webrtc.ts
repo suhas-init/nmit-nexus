@@ -33,7 +33,7 @@ const AUDIO_CONSTRAINTS: MediaStreamConstraints = {
 };
 
 const TIMEOUTS = {
-  ICE_GATHER: 2000,        // reduced — was 4000, caused laggy feel
+  ICE_GATHER: 1500,
   RING: 30000,
   CONNECT: 20000,
   DISCONNECT_GRACE: 5000,
@@ -340,6 +340,9 @@ export const callActions = {
     }
 
     cleanup();
+    answerApplied = false;
+    pendingCandidates = [];
+    pendingOffer = null;
     setState({ status: "idle" });
 
     const el = ensureAudioEl();
@@ -377,7 +380,12 @@ export const callActions = {
       await waitForIceGathering(pc);
       console.log("[webrtc] caller ICE ready, sending offer");
 
-      try { ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: pc.localDescription, peerName: myName })); } catch {}
+      const localOff = pc.localDescription;
+      if (!localOff || !localOff.type || !localOff.sdp) {
+        console.error("[webrtc] caller localDescription invalid — aborting");
+        throw new Error("Invalid local offer");
+      }
+      try { ws.send(JSON.stringify({ type: "call.offer", to: peerId, sdp: { type: localOff.type, sdp: localOff.sdp }, peerName: myName })); } catch {}
     } catch (e: any) {
       const reason = ERROR_MESSAGES[e?.message] || ERROR_MESSAGES.MIC_UNKNOWN;
       console.error("[webrtc] startCall failed:", e);
@@ -399,6 +407,8 @@ export const callActions = {
     try {
       stopRingtone();
       clearTimers();
+      answerApplied = false;
+      pendingCandidates = [];
       console.log("[webrtc] acceptCall: creating callee pc");
 
       pc = createPeerConnection(cur.peerId, ws);
@@ -439,7 +449,12 @@ export const callActions = {
       await waitForIceGathering(pc);
       console.log("[webrtc] callee ICE ready, sending answer");
 
-      try { ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: pc.localDescription })); } catch {}
+      const localAns = pc.localDescription;
+      if (!localAns || !localAns.type || !localAns.sdp) {
+        console.error("[webrtc] callee localDescription invalid — aborting");
+        throw new Error("Invalid local answer");
+      }
+      try { ws.send(JSON.stringify({ type: "call.answer", to: cur.peerId, sdp: { type: localAns.type, sdp: localAns.sdp } })); } catch {}
 
       pendingOffer = null;
       setState({ status: "active", peerId: cur.peerId, peerName: cur.peerName, muted: false });
@@ -484,14 +499,25 @@ export const callActions = {
 
     if (msg.type === "call.offer") {
       console.log("[webrtc] got offer, status:", cur.status);
+
+      // Validate payload
+      if (!msg.sdp || !msg.sdp.type || !msg.sdp.sdp) {
+        console.warn("[webrtc] malformed offer ignored");
+        return;
+      }
+
+      // Duplicate guard
       if (cur.status === "incoming" && cur.peerId === msg.from && pendingOffer) {
         console.log("[webrtc] dup offer ignored");
         return;
       }
+
+      // Busy — auto-decline
       if (cur.status !== "idle") {
         try { ws.send(JSON.stringify({ type: "call.decline", to: msg.from })); } catch {}
         return;
       }
+
       pendingOffer = msg.sdp;
       pendingCandidates = [];
       setState({ status: "incoming", peerId: msg.from, peerName: msg.peerName || "Someone" });
@@ -510,33 +536,44 @@ export const callActions = {
     else if (msg.type === "call.answer") {
       if (!pc) return;
 
-      // DEDUPE: ignore duplicate answers (WS may deliver more than once)
-      if (pc.signalingState !== "have-local-offer" || answerApplied) {
-        console.log("[webrtc] duplicate/late answer ignored, state:", pc.signalingState);
+      // Validate payload BEFORE touching state
+      if (!msg.sdp || !msg.sdp.type || !msg.sdp.sdp) {
+        console.warn("[webrtc] malformed answer ignored (null sdp)");
         return;
       }
-      answerApplied = true;
+
+      if (pc.signalingState !== "have-local-offer") {
+        console.log("[webrtc] answer ignored — wrong state:", pc.signalingState);
+        return;
+      }
+
+      if (answerApplied) {
+        console.log("[webrtc] duplicate answer ignored");
+        return;
+      }
 
       stopRingtone();
       clearTimers();
+
       try {
-        // 1. Set the answer FIRST (this is critical)
         await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        // ONLY mark applied after successful application
+        answerApplied = true;
         logAudioDirection(pc.remoteDescription?.sdp, "caller received answer");
 
-        // 2. THEN drain queued ICE
         const drained = pendingCandidates;
         pendingCandidates = [];
         for (const c of drained) {
           try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
         }
+
+        const s = useCallStore.getState().state;
+        if (s.status === "calling") {
+          setState({ status: "active", peerId: s.peerId, peerName: s.peerName, muted: false });
+          attachRemoteStream();
+        }
       } catch (e) {
-        console.error("[webrtc] answer handling failed", e);
-      }
-      const s = useCallStore.getState().state;
-      if (s.status === "calling") {
-        setState({ status: "active", peerId: s.peerId, peerName: s.peerName, muted: false });
-        attachRemoteStream();
+        console.error("[webrtc] answer apply failed (state unchanged):", e);
       }
     }
 
