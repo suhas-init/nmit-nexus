@@ -104,20 +104,22 @@ export default function SellPage() {
 
       {err && <div style={{ padding: "0.6rem 0.85rem", background: "#fdeaea", color: "#b42318", borderRadius: 8, fontSize: "0.85rem", marginBottom: "1rem" }}>{err}</div>}
 
-      <AiDraft
-        categories={categories}
-        onAccept={(draft, categoryId) => {
-          setValue("title", draft.title, { shouldValidate: true });
-          setValue("description", draft.description, { shouldValidate: true });
-          const mid = Math.round((draft.suggested_price_min + draft.suggested_price_max) / 2);
-          setValue("price", mid, { shouldValidate: true });
-          setValue("condition", draft.condition as any, { shouldValidate: true });
-          if (categoryId) setValue("category_id", categoryId, { shouldValidate: true });
-        }}
-      />
+      <div className="sell-helpers">
+        <AiDraft
+          categories={categories}
+          onAccept={(draft, categoryId) => {
+            setValue("title", draft.title, { shouldValidate: true });
+            setValue("description", draft.description, { shouldValidate: true });
+            const mid = Math.round((draft.suggested_price_min + draft.suggested_price_max) / 2);
+            setValue("price", mid, { shouldValidate: true });
+            setValue("condition", draft.condition as any, { shouldValidate: true });
+            if (categoryId) setValue("category_id", categoryId, { shouldValidate: true });
+          }}
+        />
 
-      <div style={{ marginBottom: "1rem" }}>
-        <BookSearch onPick={onBookPick} />
+        <div className="card sell-book-lookup" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
+          <BookSearch onPick={onBookPick} />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>

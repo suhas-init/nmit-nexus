@@ -38,7 +38,7 @@ export function BookSearch({ onPick }: { onPick: (b: BookHit) => void }) {
 
   return (
     <div style={{ position: "relative" }}>
-      <label className="term-label" style={{ display: "block", marginBottom: "0.5rem" }}>
+      <label className="term-label" style={{ display: "block", marginBottom: "0.6rem" }}>
         BOOK_LOOKUP · autofill from Open Library
       </label>
       <div style={{ display: "flex", gap: "0.5rem" }}>

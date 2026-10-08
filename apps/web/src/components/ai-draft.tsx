@@ -54,10 +54,10 @@ export function AiDraft({
       borderColor: "rgba(139,92,246,0.30)",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem", fontWeight: 700, color: "var(--violet)", fontSize: "0.85rem", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
-        <Sparkles size={15} /> AI_LISTING_COPILOT
+        <Sparkles size={15} /> AUTO_LIST
       </div>
       <div style={{ fontSize: "0.82rem", color: "var(--text-1)", marginBottom: "0.75rem" }}>
-        Describe your item in rough words. I'll write the title, description, price range, and pick a category.
+        Type rough words. Get a clean listing draft — title, description, price range, category.
       </div>
       <textarea
         className="textarea"

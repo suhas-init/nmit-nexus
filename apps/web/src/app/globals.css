@@ -1436,3 +1436,33 @@ html[data-theme="light"] .wanted-cta {
 html[data-theme="light"] .wanted-cta:hover {
   box-shadow: 0 12px 32px -8px rgba(180, 83, 9, 0.5) !important;
 }
+
+/* ============================================================ */
+/* SELL PAGE — Auto List + Book Lookup side by side              */
+/* ============================================================ */
+.sell-helpers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.sell-helpers > * {
+  margin-bottom: 0 !important;
+}
+
+.sell-book-lookup {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.06) 0%, rgba(96, 165, 250, 0.03) 100%) !important;
+  border-color: rgba(14, 165, 233, 0.25) !important;
+}
+
+@media (max-width: 720px) {
+  .sell-helpers { grid-template-columns: 1fr; }
+}
+
+/* Light theme */
+html[data-theme="light"] .sell-book-lookup {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(96, 165, 250, 0.02) 100%) !important;
+  border-color: rgba(14, 165, 233, 0.28) !important;
+}
